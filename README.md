@@ -28,7 +28,7 @@ the following resources are created by the main script:
 - an action group which handles the sending of E-Mail alerts specified in the monitoring section below (if there is at least one E-Mail address in the config file under "alertRecipientMailAddresses", otherwise NO alerts are created)
   - having automated E-Mail alerts in place means you don't have to proactively check the status of your Functions
 
-TODO \<insert overview diagramm of resulting Azure architecture as it is setup by the script\>
+![overview diagramm of resulting Azure architecture as setup by the script](./readme_attachments/azure_overview.png)
 
 ### Function samples and corresponding unittests
 - an HTTP Function that replies with a message depending on the passed parameters
