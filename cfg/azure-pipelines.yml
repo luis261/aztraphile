@@ -1,0 +1,70 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-20.04
+
+steps:
+- checkout: self
+  fetchDepth: 1
+
+- task: UsePythonVersion@0
+  displayName: Use Python $(PythonVersion)
+  inputs:
+    versionSpec: $(PythonVersion)
+
+- task: CmdLine@2
+  displayName: Upgrade pip
+  inputs:
+    script: python -m pip install --upgrade pip
+
+- task: CmdLine@2
+  displayName: Install requirements
+  inputs:
+    script: pip install -r requirements.txt
+
+- task: CmdLine@2
+  displayName: Run tests
+  continueOnError: True
+  inputs:
+    script: pytest tests --junitxml=tests/test-report.xml -v -rA
+
+- task: PublishTestResults@2
+  displayName: Publish test results
+  inputs:
+    testResultsFiles: "**/test-report.xml"
+    failTaskOnFailedTests: true
+
+- task: AzureCLI@2
+  displayName: Install Azure Function Core Tools
+  inputs:
+    azureSubscription: $(ServiceConnName)
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+      sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+      sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list'
+      sudo apt-get update
+      sudo apt-get install azure-functions-core-tools
+
+- task: AzureCLI@2
+  displayName: Deploy
+  inputs:
+    azureSubscription: $(ServiceConnName)
+    scriptType: bash
+    scriptLocation: inlineScript
+    ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      inlineScript: |
+        az upgrade
+        az functionapp deployment slot auto-swap -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot 'test' --disable
+        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --settings '@$(Build.SourcesDirectory)/cfg/appsettings.json'
+        func azure functionapp publish '$(FunctionAppName)' --python --build remote
+    ${{ else }}:
+      inlineScript: |
+        az upgrade
+        az functionapp deployment slot auto-swap -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot 'test' --disable
+        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot-settings '@$(Build.SourcesDirectory)/cfg/appsettings.json' --slot 'test'
+        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot-settings "BlobOutpath=$(TestSlotBlobOutPath)" --slot 'test'
+        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot-settings "Schedule=$(TestSlotSchedule)" --slot 'test'
+        func azure functionapp publish '$(FunctionAppName)' --python --build remote --slot 'test'
