@@ -90,6 +90,7 @@ there are lots of orchestration/utility features in the form of powerhsell funct
       - that way, you can observe new versions being "tested automatically" with limited potential for major repercussions before deciding whether to merge or not
     - or maybe there's another team that's pushing for new features you are responsible for, which they need in a new service they're currently getting off the ground
       - you could offer them to hook up to the test slot for faster access to new features under the caveat that it might be unstable
+    - thus, the less vital consumers can act as an additional layer of validation in terms of testing
 - filtering logs based on their message ```Fetch-FaInsights -InsightsSpecifier "logs" -Raw | Where-Object (Build-LogMessageSieve "executed")```
 - polling of logs (live, without duplicated events) and optional filtering based on a passed query (coming soon)
 - live metric plotting in a console window (coming soon)
