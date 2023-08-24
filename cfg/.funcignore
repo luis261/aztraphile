@@ -1,0 +1,6 @@
+.git*
+.venv
+.vscode
+azure-pipelines.yml
+local.settings.json
+tests
