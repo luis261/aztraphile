@@ -79,16 +79,17 @@ there are lots of orchestration/utility features in the form of powerhsell funct
 - ```Invoke-Function``` let's you call a Function via it's HTTP API
 
 ## Advanced usage
-- you can try to be extra smart about your testing strategy and achieve a level of efficiency that's usually only achievable with proper suites of unittests (even without covering your code in unittests and maintaining them)
+- you can try to be extra smart about your testing strategy and achieve a high level of efficiency without covering your code in unittests and maintaining them that's usually only achievable with proper suites of unittests
   - (you could also use this strategy complementary to your unittest, I definitely don't discourage having unittests anyway!)
-  - the way to achieve efficient integration/system-level testing in this context is via leveraging the automatic deployments that trigger on PR creation
-    - let's say you have an important service that is the main consumer of you functions API
+  - the way to achieve that kind of efficiency through integration/system-level testing in this context is via leveraging the automatic deployments that trigger on PR creation as follows:
+    - let's say you have an important service that is the main consumer of the API of your Function
     - but you also have a dashboard internal to your team that's used to guide/support some day-to-day manual activity
-    - or just another, less critical service
-    - or maybe just some other legacy service your in the process of phasing out anyway
-    - configure that non-critical service/dashboard to use the URL pointing to the test slot => can then observe new changes in a PR being "tested" automatically with limited potential for repercussions b4 merging into main thus moving them to PROD
+      - or just another, less critical service
+      - or maybe just some other legacy service you're in the process of phasing out anyway
+    - configure that non-critical service/dashboard to use the URL pointing to the test slot
+      - that way, you can observe new versions being "tested automatically" with limited potential for major repercussions before deciding whether to merge or not
     - or maybe there's another team that's pushing for new features you are responsible for, which they need in a new service they're currently getting off the ground
-    - you could offer them access to test slot for faster access to new features ... under the caveat that it might be unstable (but guess what, since they are still in DEV phase, they might prefer faster access to features over stability)
+      - you could offer them to hook up to the test slot for faster access to new features under the caveat that it might be unstable
 - filtering logs based on their message ```Fetch-FaInsights -InsightsSpecifier "logs" -Raw | Where-Object (Build-LogMessageSieve "executed")```
 - polling of logs (live, without duplicated events) and optional filtering based on a passed query (coming soon)
 - live metric plotting in a console window (coming soon)
