@@ -1,0 +1,10 @@
+{
+    "azureResourcesPrefix": "ReplaceWithYourDescriptiveGUID",
+    "defaultPullReviewerMailAddresses": [],
+    "aspTier": "P1V2",
+    "createKeyVault": true,
+    "pythonVersion": "3.10",
+    "devOpsProject": "ReplaceWithYourProjectName",
+    "devOpsOrg": "https://dev.azure.com/yourorg",
+    "alertRecipientMailAddresses": []
+}
