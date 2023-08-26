@@ -253,6 +253,14 @@ function Set-GroupToInspect {
         [string]
         # Resource Group to be used as target for other utility functions
         [Parameter(Mandatory)]
+        [ArgumentCompleter({
+            param ($commandName,
+                   $parameterName,
+                   $wordToComplete,
+                   $commandAst,
+                   $fakeBoundParameters)
+            "'$ResourceGroupToInspect'"
+        })]
         $ResourceGroup
     )
     Write-Warning "`"$ResourceGroup`" will now be used as the default RG, you can change that via calling `"Set-GroupToInspect`" directly"
