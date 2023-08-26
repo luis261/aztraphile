@@ -20,12 +20,14 @@ the following resources are created by the main script:
 - Function App
   - this is where your code gets executed
   - contains your application settings (environment variables)
-  - contains a test slot that's configured to be an environment nearly identical to PROD and which is also a target for automatic deployments
+  - contains a test slot that's configured to be an environment nearly identical to PROD
+    - it is also a target for automatic deployments (in particular: deployments resulting from the build validation policy that get's triggered on the creation of new PRs)
 - Application Insights
 - Key Vault (only created if "createKeyVault" is set to true in the config file)
-  - it can securely store confidential data (such as API credentials) for you in the form of secrets
+  - can securely store confidential data (such as API credentials) in the form of secrets
   - a secret with name "ExampleSecret" is created by default, you can use it for experimentation purposes
-- Action Group which handles the sending of E-Mail alerts specified in the monitoring section below (if there is at least one E-Mail address in the config file under "alertRecipientMailAddresses", otherwise NO alerts are created)
+- Action Group (only gets created if there is at least one E-Mail address in the config file under "alertRecipientMailAddresses", otherwise NO alerts are created)
+  - handles the sending of E-Mail alerts specified in the monitoring section below
   - having automated E-Mail alerts in place means you don't have to proactively check the status of your Functions
 
 ![overview diagramm of resulting Azure architecture as setup by the script](./readme_attachments/azure_overview.png)
@@ -37,7 +39,7 @@ the project ships with these pre-written Function samples so you don't have to w
 - Timer triggered Function
 - HTTP Function that copies a Blob file
 - Timer triggered Function that logs to a Blob file (and another function that periodically clears that file)
-- there are unit test samples for all of these Functions (written using pytest)
+- there are unittest samples for all of these Functions (written using pytest)
   - since you inherit a functioning assortment of tests that are properly integrated into your deployment process from the start, the usual entry barrier of having to setup a test-suite from scratch is avoided
   - this way, you can make it a habit to using automated testing for your Azure Functions from the start instead of putting it off and accruing tech debt over time
 
@@ -69,10 +71,8 @@ TODO \<insert anatomy of deployment, hosting & runtime interactions (depicts cod
   - additionally, a log search alert rule is created that activates if any exceptions occurred in the execution of your Functions during the last hour
 - instead of using such builtin push-based constructs, you could easily opt for a polling-based approach by running queries periodically using "Fetch-FaMetrics" and "Fetch-FaInsights" (a simple example of expre-built keyword filtering for Fetchfainsights is shown in the "Advanced features" section, you can go explore the code or run the Get-Help commandlet on the mentioned utility functions for in-depth documentation)
 
-TODO: pic mail alert
-
 ### Additional orchestration features
-there are lots of orchestration/utility features in the form of powerhsell functions stored in ```aztra\_utils.ps1```. You can run them locally, so you don'T have to bother with the Azure portal
+there are lots of orchestration/utility features in the form of powershell functions stored in ```aztra-utils.ps1```. You can run them locally, so you don't have to bother with the Azure portal
 - ```Set-AzPipelinesVar``` can create/update DevOps build variables for you
 - ```Create-StorageContainer``` let's you create Storage Containers
 - ```Set-KvSecret``` let's you create secrets
@@ -80,17 +80,17 @@ there are lots of orchestration/utility features in the form of powerhsell funct
 - ```Invoke-Function``` let's you call a Function via it's HTTP API
 
 ## Advanced usage
-- you can try to be extra smart about your testing strategy and achieve a high level of efficiency without covering your code in unittests and maintaining them that's usually only achievable with proper suites of unittests
-  - (you could also use this strategy complementary to your unittest, I definitely don't discourage having unittests anyway!)
+- you can try to be extra smart about your testing strategy and achieve a level of efficiency that's usually only achievable with proper suites of unittests even without covering your code and maintaining those tests
+  (- you could also use this strategy complementary to your unittests, I definitely don't discourage having them anyway!)
   - the way to achieve that kind of efficiency through integration/system-level testing in this context is via leveraging the automatic deployments that trigger on PR creation as follows:
     - let's say you have an important service that is the main consumer of the API of your Function
     - but you also have a dashboard internal to your team that's used to guide/support some day-to-day manual activity
-      - or just another, less critical service
-      - or maybe just some other legacy service you're in the process of phasing out anyway
+      - or maybe just another, less critical service
+      - or even a legacy service you're in the process of phasing out anyway
     - configure that non-critical service/dashboard to use the URL pointing to the test slot
-      - that way, you can observe new versions being "tested automatically" with limited potential for major repercussions before deciding whether to merge or not
-    - or maybe there's another team that's pushing for new features you are responsible for, which they need in a new service they're currently getting off the ground
-      - you could offer them to hook up to the test slot for faster access to new features under the caveat that it might be unstable
+      - this way, you can observe the results of new versions being "tested automatically" with limited potential for major repercussions before deciding whether to merge new changes or not
+    - another situation where you can leverage your test slot would be if you're in a situation where there's another team that's pushing for new features you are responsible for, which they might need for a new service they're currently getting off the ground
+      - you could offer to hook them up to the test slot for fast access to new features under the caveat that it might not be completely stable
     - thus, the less vital consumers can act as an additional layer of validation in terms of testing
 - filtering logs based on their message ```Fetch-FaInsights -InsightsSpecifier "logs" -Raw | Where-Object (Build-LogMessageSieve "executed")```
 - polling of logs (live, without duplicated events) and optional filtering based on a passed query (coming soon)
