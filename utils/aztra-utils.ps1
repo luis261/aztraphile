@@ -176,7 +176,7 @@ function Fetch-FaInsights([string]$InsightsSpecifier, [string]$Offset, [switch]$
             } else {
                 $AppInsights = $AppInsightsToQuery
             }
-        } catch [System.Management.Automation.RuntimeException] {
+        } catch {
             Write-Warning "no app insights instance was specified, performing search in given RG"
             $Res = az resource list -g $ResourceGroupToInspect --resource-type "Microsoft.Insights/components" --output json | ConvertFrom-Json
             try {
@@ -489,7 +489,6 @@ function Ensure-RgToInspectSet() {
         Set-GroupToInspect $RgInput
     }
 }
-
 
 
 function Ask-ToConfirmElseExit {
