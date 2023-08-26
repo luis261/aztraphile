@@ -50,8 +50,8 @@ the following is a description of the setup in Azure DevOps:
 - pipeline defined by an azure-pipelines.yml file which carries out the testing and deployment process
     - automatically deploys the latest commit on the main branch to Azure
     - variables for that pipeline that allow you to parameterize certain aspects relating to your code in Azure, e.g. configuring a CRON schedule for your test slot that differs from the one used productively (to avoid load interference)
-    - when deploying your code, the pipeline also configures the appsettings of the Function according to the "appsettings.json" file that is tracked by git
-      - this way, configuration changes also undergo a peer review process and can be tracked over time
+    - when deploying your code, the pipeline also configures the appsettings of your Function App according to the "appsettings.json" file that is tracked by git
+      - this way, changes to environment variables are also subject to peer reviews, are tracked over time and can thus be traced retroactively
       - just make sure to never directly store credentials in the mentioned JSON file; instead, store them as a secret in the Key Vault as shown in the corresponding function samples (you do need a Key Vault reference in the appsettings file though, as shown here)
     - the pipeline also integrates with the builtin Azure Devops test reporting feature TODO \<insert screenshot of example test report\>
 - repository policy ensuring PRs targeting main can't get merged unless they have at least 2 approvers
