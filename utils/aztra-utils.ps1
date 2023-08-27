@@ -112,7 +112,7 @@ function Fetch-FaMetric {
         try {
             $AspName = $Res.name
         } catch [System.Management.Automation.RuntimeException] {
-            Write-Error $_.Exception.Message
+            Write-Warning $_.Exception.Message
             throw "the given RG `"$ResourceGroupToInspect`" does not contain any app service plans"
         }
 
@@ -182,7 +182,7 @@ function Fetch-FaInsights([string]$InsightsSpecifier, [string]$Offset, [switch]$
             try {
                 $InsightsInstanceName = $Res.name
             } catch [System.Management.Automation.RuntimeException] {
-                Write-Error $_.Exception.Message
+                Write-Warning $_.Exception.Message
                 throw "the given RG `"$ResourceGroupToInspect`" does not contain any application insights instances"
             }
 
@@ -447,6 +447,19 @@ function Login-PersistInfo([switch]$NoCleanup) {
     Write-Host 'OK: authenticated against Azure'
 }
 
+
+function Extract-FromDefaults($Key, $Defaults) {
+    $TargetLine = $Defaults | Where-Object {$_ -like "*$Key = *"}
+    if ($TargetLine) {
+        $Fragments = $TargetLine -split "="
+        if ($Fragments.Length -eq 2) {
+            if ($Fragments[1].Trim().Length -ge 1) {
+                return $Fragments[1].Trim()
+            }
+        }
+    }
+}
+
 function Login-ToDevOps($DevOpsOrg, $Project, [switch]$NoCleanup) {
     try {
         if (-Not [string]::IsNullOrEmpty($DevOpsPat)) {
@@ -454,11 +467,18 @@ function Login-ToDevOps($DevOpsOrg, $Project, [switch]$NoCleanup) {
         }
     } catch [System.Management.Automation.RuntimeException] { }
 
-    if (-Not $DevOpsOrg) {
-        $DevOpsOrg = Read-Host 'Enter the base URL to your Azure DevOps organization'
+    $Defaults = az devops configure -l
+    if ([string]::IsNullOrEmpty($DevOpsOrg)) {
+        $DevOpsOrg = Extract-FromDefaults "organization" $Defaults
+        if ($DevOpsOrg -eq $null) {
+            $DevOpsOrg = Read-Host 'Enter the base URL to your Azure DevOps organization'
+        }
     }
-    if (-Not $Project) {
-        $Project = Read-Host 'Enter the name of your Azure DevOps project'
+    if ([string]::IsNullOrEmpty($Project)) {
+        $Project = Extract-FromDefaults "project" $Defaults
+        if ($Project -eq $null) {
+            $Project = Read-Host 'Enter the name of your Azure DevOps project'
+        }
     }
 
     $global:DevOpsPat = Read-Host 'Enter the DevOps Personal Access Token'
@@ -476,15 +496,8 @@ function Login-ToDevOps($DevOpsOrg, $Project, [switch]$NoCleanup) {
         } | Out-Null
     }
 
-    if ($DevOpsOrg -and $Project) {
-        az devops configure --defaults organization=$DevOpsOrg project=$Project *>$null
-        Write-Host "OK: authenticated and configured with the defaults of `"$Project`" in `"$DevOpsOrg`""
-    } else {
-        $Defaults = az devops configure -l
-        $Project = ($Defaults[2] -split "=")[1].Trim()
-        $DevOpsOrg = ($Defaults[3] -split "=")[1].Trim()
-        Write-Host "OK: authenticated, your defaults are: `"$Project`" in `"$DevOpsOrg`""
-    }
+    az devops configure --defaults organization=$DevOpsOrg project=$Project *>$null
+    Write-Host "OK: authenticated and configured with the defaults of `"$Project`" in `"$DevOpsOrg`""
 }
 
 function Ensure-RgToInspectSet() {
@@ -501,8 +514,8 @@ function Ensure-RgToInspectSet() {
 
 function Ask-ToConfirmElseExit {
     [CmdletBinding()]
-    Param([switch]$Question, [string]$Header)
-    if(-Not ($Force.IsPresent -or $PSCmdlet.ShouldContinue($Question, $Header))) {
+    Param([string]$Question, [string]$Header, [switch]$Force)
+    if($Force -or (-Not $PSCmdlet.ShouldContinue($Question, $Header))) {
         echo "Stopping as requested, instead of proceeding with $Header"
         Exit 1
     }
@@ -552,15 +565,23 @@ function Handle-FallbackRouting([string]$Action, [string]$Message='') {
     }
 }
 
+
+function Warn-CustomThenThrowErr($CustomMessage, $Err) {
+    Write-Warning $CustomMessage
+    throw $Err.Exception.Message
+}
+
+
 function Write-ToObj($TargetObject, [string]$Key, $Value, [switch]$Silent, [switch]$NoOverwrite) {
     if (Get-Member -inputobject $TargetObject -name $Key) {
         if ($NoOverwrite) {
+            # TODO quotes!
             if ($Silent) {} else {
-                Write-Warning "not setting $Key on the given object: $Key is already set to $(Get-Member -inputobject $TargetObject -name $Key)"
+                Write-Warning "not setting $Key on the given object: $Key is already set to $($TargetObject.$Key)"
             }
         } else {
             if ($Silent) {} else {
-                Write-Warning "overwriting $(Get-Member -inputobject $TargetObject -name $Key) under $Key with $Value"
+                Write-Warning "overwriting value $($TargetObject.$Key) under $Key with $Value"
             }
             $TargetObject | Add-Member -Name $Key -Type NoteProperty -Value $Value -Force
         }
@@ -580,44 +601,4 @@ function Assert-Keys-Exist($TargetObject, $Keys, [switch]$Silent) {
         }
     }
     return $Flag
-}
-
-function Identify-ResourceToReuse([string]$ResourceType, [bool]$ReuseOnly) {
-    switch ($ResourceType) {
-        "group" {
-            $FoundResources = az group list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Resource Groups"
-        }
-        "functionapp" {
-            $FoundResources = az functionapp list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Function Apps"
-        }
-        "appservice plan" {
-            $FoundResources = az appservice plan list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "App Service Plans"
-        }
-        "storage account" {
-            $FoundResources = az storage account list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Storage Accounts"
-        }
-        "keyvault" {
-            $FoundResources = az keyvault list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Key Vaults"
-        }
-        default {
-            Write-Error "`"Identify-ResourceToReuse`" received unexpected parameter"
-        }
-    }
-    
-    if ($FoundResources.length -eq 1) {
-        return $FoundResources[0]
-    } elseif ($FoundResources.length -eq 0) {
-        if ($ReuseOnly)  {
-            Write-Error "found 0 $Descriptor matching the configured prefix, expected to find exactly 1"
-        } else {
-            return $null
-        }
-    } else {
-        Write-Error "found $($FoundResources.length) $Descriptor matching the configured prefix, 1 or 0 would have been acceptable"
-    }
 }

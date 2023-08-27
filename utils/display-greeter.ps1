@@ -78,7 +78,7 @@ $TextFragments+="                                               |  |$([Environme
 $Colors+=$BaseColor
 $TextFragments+="                                               |__|"
 $Colors+=$BaseColor
-$TextFragments+="  TODO_INSERT_SLOGAN$([Environment]::NewLine)"
+$TextFragments+="  I am the storm$([Environment]::NewLine)"
 $Colors+='White'
 
 Write-Host
