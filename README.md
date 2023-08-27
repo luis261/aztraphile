@@ -1,5 +1,5 @@
 # aztraphile
-TODO \<insert screenshot of output as seen on startup\>
+![startup GIF](./readme_attachments/startup.gif)
 
 ## Introduction
 aztraphile 🌩️ is an automation tool intended to help you accelerate the process of rolling out new Python Azure Functions 🚀 as well as ensuring you are adequately equipped to keep those Functions running smoothly. Overall, it entails:
