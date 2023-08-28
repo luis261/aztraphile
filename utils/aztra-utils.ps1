@@ -577,11 +577,11 @@ function Write-ToObj($TargetObject, [string]$Key, $Value, [switch]$Silent, [swit
         if ($NoOverwrite) {
             # TODO quotes!
             if ($Silent) {} else {
-                Write-Warning "not setting $Key on the given object: $Key is already set to $($TargetObject.$Key)"
+                Write-Warning "not setting `"$Key`" on the given object: `"$Key`" is already set to `"$($TargetObject.$Key)`""
             }
         } else {
             if ($Silent) {} else {
-                Write-Warning "overwriting value $($TargetObject.$Key) under $Key with $Value"
+                Write-Warning "overwriting value `"$($TargetObject.$Key)`" under `"$Key`" with `"$Value`""
             }
             $TargetObject | Add-Member -Name $Key -Type NoteProperty -Value $Value -Force
         }
@@ -601,4 +601,15 @@ function Assert-Keys-Exist($TargetObject, $Keys, [switch]$Silent) {
         }
     }
     return $Flag
+}
+
+function Perform-EarlyAzLogout() {
+    az logout
+    $global:LoginInfo = $null
+    Write-Host 'OK: logged out of Azure'
+}
+function Perform-EarlyDevOpsLogout() {
+    az devops logout
+    $global:DevOpsPat = $null
+    Write-Host 'OK: logged out of Azure DevOps'
 }
