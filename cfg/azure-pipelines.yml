@@ -58,13 +58,13 @@ steps:
       inlineScript: |
         az upgrade
         az functionapp deployment slot auto-swap -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot 'test' --disable
-        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --settings '@$(Build.SourcesDirectory)/cfg/appsettings.json'
+        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --settings '@$(Build.SourcesDirectory)/appsettings.json'
         func azure functionapp publish '$(FunctionAppName)' --python --build remote
     ${{ else }}:
       inlineScript: |
         az upgrade
         az functionapp deployment slot auto-swap -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot 'test' --disable
-        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot-settings '@$(Build.SourcesDirectory)/cfg/appsettings.json' --slot 'test'
+        az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot-settings '@$(Build.SourcesDirectory)/appsettings.json' --slot 'test'
         az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot-settings "BlobOutpath=$(TestSlotBlobOutPath)" --slot 'test'
         az functionapp config appsettings set -g '$(ResourceGroupName)' -n '$(FunctionAppName)' --slot-settings "Schedule=$(TestSlotSchedule)" --slot 'test'
         func azure functionapp publish '$(FunctionAppName)' --python --build remote --slot 'test'
