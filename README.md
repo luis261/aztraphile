@@ -62,8 +62,8 @@ the following is a description of the setup in Azure DevOps:
 TODO \<insert anatomy of deployment, hosting & runtime interactions (depicts code lifecycle stages)\>
 
 ### Monitoring and alerting
-- this project contains code that can plot graphs in the console (by including this version of Show-Graph: https://gist.github.com/PrateekKumarSingh/9168afa8e7c7da801efa858705fb485b)
-  - that feature is in "Show-FaMetric" which graphically displays CPU and memory consumption
+- this project contains code that can plot graphs in the console; calls [Show-Graph](https://gist.github.com/PrateekKumarSingh/9168afa8e7c7da801efa858705fb485b) under the hood
+  - graphical monitoring is available via "Show-FaMetric" which can display CPU and memory workload
   - displaying key metrics over configurable spans of times like that can help you recognize patterns at first glance you might have missed otherwise
 - by default (if the condition described in the provisioning section above is met in the config file), you will receive E-Mail alerts pertaining to your function
   - there is a metric alert rule that triggers if the average CPU percentage is over 90
