@@ -5,7 +5,7 @@ Set-StrictMode -Version 3.0
 #. "$PSScriptRoot/plotting.ps1"
 
 
-$GitLogFile = "$PSScriptRoot/../git.log"
+$GitLogFile = ("$PSScriptRoot/../git.log" | Resolve-Path).Path
 
 
 <#
@@ -536,7 +536,7 @@ function Fetch-ByLocalCopy([string]$SelectionSpecifier, [string]$Destination='.'
 }
 
 function Add-ToIndex([string]$SelectionSpecifier, [string]$GitErrorAction='EXIT') {
-    git add $SelectionSpecifier *>>"$PSScriptRoot/$GitLogFile"
+    git add $SelectionSpecifier *>>"$GitLogFile"
     Assert-GitStatusOk $GitErrorAction
 }
 
