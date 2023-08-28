@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 3.0
 
 
-#. "$PSScriptRoot/plotting.ps1"
+. "$PSScriptRoot/plotting.ps1"
 
 
 $GitLogFile = ("$PSScriptRoot/../git.log" | Resolve-Path).Path
