@@ -86,7 +86,7 @@ Set-StrictMode -Version 3.0
 # git sometimes outputs informational messages on stderr
 $env:GIT_REDIRECT_STDERR = '2>&1'
 $ConfigFile = 'cfg/config.json'
-$TargetRepoPathPrefix = ("$PSScriptRoot/.." | Resolve-Path).Path
+$TargetRepoPathPrefix = "$PSScriptRoot"
 
 
 Write-Host '=====Initiating prevalidation'
