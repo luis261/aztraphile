@@ -89,6 +89,65 @@ $ConfigFile = 'cfg/config.json'
 $TargetRepoPathPrefix = "$PSScriptRoot"
 
 
+function Login-ToDevOpsWriteInfo() {
+    Write-Host '=====Authenticating and configuring DevOps extension'
+    Login-ToDevOps -DevOpsOrg "$($Cfg.devOpsOrg)" -Project "$($Cfg.devOpsProject)" -NoCleanup
+}
+
+function Identify-ResourceToReuse([string]$ResourceType, [bool]$ReuseOnly) {
+    switch ($ResourceType) {
+        'group' {
+            $FoundResources = az group list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
+            $Descriptor = 'Resource Groups'
+        }
+        'functionapp' {
+            $FoundResources = az functionapp list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
+            $Descriptor = 'Function Apps'
+        }
+        'appservice plan' {
+            $FoundResources = az appservice plan list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
+            $Descriptor = 'App Service Plans'
+        }
+        'storage account' {
+            $FoundResources = az storage account list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
+            $Descriptor = 'Storage Accounts'
+        }
+        'keyvault' {
+            $FoundResources = az keyvault list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
+            $Descriptor = 'Key Vaults'
+        }
+        default {
+            Write-Error "`"Identify-ResourceToReuse`" received unexpected parameter"
+        }
+    }
+
+    if ($FoundResources.length -eq 1) {
+        Write-Warning "`"$($FoundResources[0].name)`" matches the configured prefix, will use that resource instead of creating any new $Descriptor"
+        return $FoundResources[0]
+    } elseif ($FoundResources.length -eq 0) {
+        if ($ReuseOnly)  {
+            Write-Error "found 0 $Descriptor matching the configured prefix, expected to find exactly 1"
+        } else {
+            return $null
+        }
+    } else {
+        Write-Error "found $($FoundResources.length) $Descriptor matching the configured prefix, 1 or 0 would have been acceptable"
+    }
+}
+
+function Perform-EarlyAzLogout() {
+    az logout
+    $global:LoginInfo = $null
+    Write-Host 'OK: logged out of Azure'
+}
+
+function Perform-EarlyDevOpsLogout() {
+    az devops logout
+    $global:DevOpsPat = $null
+    Write-Host 'OK: logged out of Azure DevOps'
+}
+
+
 Write-Host '=====Initiating prevalidation'
 
 Write-Host '=======Checking local dependencies'
@@ -385,63 +444,4 @@ try {
     Warn-CustomThenThrowErr 'an error occurred, logging out of Azure DevOps' $_
 } finally {
     Perform-EarlyDevOpsLogout
-}
-
-
-function Login-ToDevOpsWriteInfo() {
-    Write-Host '=====Authenticating and configuring DevOps extension'
-    Login-ToDevOps -DevOpsOrg "$($Cfg.devOpsOrg)" -Project "$($Cfg.devOpsProject)" -NoCleanup
-}
-
-function Identify-ResourceToReuse([string]$ResourceType, [bool]$ReuseOnly) {
-    switch ($ResourceType) {
-        'group' {
-            $FoundResources = az group list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = 'Resource Groups'
-        }
-        'functionapp' {
-            $FoundResources = az functionapp list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = 'Function Apps'
-        }
-        'appservice plan' {
-            $FoundResources = az appservice plan list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = 'App Service Plans'
-        }
-        'storage account' {
-            $FoundResources = az storage account list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = 'Storage Accounts'
-        }
-        'keyvault' {
-            $FoundResources = az keyvault list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = 'Key Vaults'
-        }
-        default {
-            Write-Error "`"Identify-ResourceToReuse`" received unexpected parameter"
-        }
-    }
-
-    if ($FoundResources.length -eq 1) {
-        Write-Warning "`"$($FoundResources[0].name)`" matches the configured prefix, will use that resource instead of creating any new $Descriptor"
-        return $FoundResources[0]
-    } elseif ($FoundResources.length -eq 0) {
-        if ($ReuseOnly)  {
-            Write-Error "found 0 $Descriptor matching the configured prefix, expected to find exactly 1"
-        } else {
-            return $null
-        }
-    } else {
-        Write-Error "found $($FoundResources.length) $Descriptor matching the configured prefix, 1 or 0 would have been acceptable"
-    }
-}
-
-function Perform-EarlyAzLogout() {
-    az logout
-    $global:LoginInfo = $null
-    Write-Host 'OK: logged out of Azure'
-}
-
-function Perform-EarlyDevOpsLogout() {
-    az devops logout
-    $global:DevOpsPat = $null
-    Write-Host 'OK: logged out of Azure DevOps'
 }
