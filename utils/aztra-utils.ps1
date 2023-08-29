@@ -301,30 +301,30 @@ function Restart-FunctionAppCompletely {
     Ensure-LoggedIn
     Ensure-RgToInspectSet
 
-    Write-Host "Stopping $FunctionAppName"
+    Write-Warning "Stopping $FunctionAppName"
     if ($Slot) {
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Host 'Waiting for 60 seconds'
+    Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
-    Write-Host "Starting $FunctionAppName"
+    Write-Warning "Starting $FunctionAppName"
     if ($Slot) {
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Host 'Waiting for 60 seconds'
+    Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
 
-    Write-Host "Restarting $FunctionAppName"
+    Write-Warning "Restarting $FunctionAppName"
     if ($Slot) {
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Host 'Waiting for 60 seconds'
+    Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
 }
 
@@ -357,7 +357,6 @@ function Invoke-Function {
     }
     $CallUrl = (az functionapp function show -g $ResourceGroupToInspect -n $FunctionAppName --function-name $FunctionName | ConvertFrom-Json).invokeUrlTemplate
 
-    Write-Host "${CallUrl}?code=$FunctionKey"
     Invoke-WebRequest -Uri "${CallUrl}?code=$FunctionKey"
 }
 
@@ -517,18 +516,6 @@ function Ask-ToConfirmElseExit {
         Exit 1
     }
     echo "Proceeding as requested with $Header"
-}
-
-function Perform-EarlyAzLogout() {
-    az logout
-    $global:LoginInfo = $null
-    Write-Host 'OK: logged out of Azure'
-}
-
-function Perform-EarlyDevOpsLogout() {
-    az devops logout
-    $global:DevOpsPat = $null
-    Write-Host 'OK: logged out of Azure DevOps'
 }
 
 function Copy-ToIndex([string]$SelectionSpecifier, [string]$FetchPathPrefix, $Destination='.', $GitErrorAction='EXIT') {

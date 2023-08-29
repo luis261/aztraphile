@@ -23,41 +23,41 @@ param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         @(
-            "eastus",
-            "southeastasia",
-            "northeurope",
-            "swedencentral",
-            "westeurope",
-            "centralus",
-            "centralindia",
-            "eastasia",
-            "canadacentral",
-            "polandcentral",
-            "uaenorth",
-            "qatarcentral",
-            "asia",
-            "asiapacific",
-            "australia",
-            "brazil",
-            "canada",
-            "europe",
-            "france",
-            "germany",
-            "global",
-            "india",
-            "japan",
-            "korea",
-            "norway",
-            "singapore",
-            "southafrica",
-            "switzerland",
-            "uae",
-            "uk",
-            "westus",
-            "southindia",
-            "westindia",
-            "canadaeast",
-            "uaecentral"
+            'eastus',
+            'southeastasia',
+            'northeurope',
+            'swedencentral',
+            'westeurope',
+            'centralus',
+            'centralindia',
+            'eastasia',
+            'canadacentral',
+            'polandcentral',
+            'uaenorth',
+            'qatarcentral',
+            'asia',
+            'asiapacific',
+            'australia',
+            'brazil',
+            'canada',
+            'europe',
+            'france',
+            'germany',
+            'global',
+            'india',
+            'japan',
+            'korea',
+            'norway',
+            'singapore',
+            'southafrica',
+            'switzerland',
+            'uae',
+            'uk',
+            'westus',
+            'southindia',
+            'westindia',
+            'canadaeast',
+            'uaecentral'
         ) | Where-Object {
             $_ -like "*$wordToComplete*"
         } | ForEach-Object {
@@ -65,7 +65,7 @@ param(
         }
     })]
     $AzureStorageGeoLocation,
-    # prefix for the names of the Azure resources (actually determines the "core" of the names, they will just be appended a small resource-type-dependent suffix) (overrides value in config file)
+    # prefix for the names of the Azure resources (actually determines the "core" of the names, only a small resource-type-dependent suffix will be appended) (overrides value in config file)
     $AzureResourcesPrefix,
     # your Azure DevOps project (overrides value in config file)
     $DevOpsProject,
@@ -95,15 +95,15 @@ Write-Host '=======Checking local dependencies'
 try {
     git -v | Out-Null
 } catch {
-    Write-Error "seems like you don't have git installed"
+    Write-Error 'seems like you don't have git installed'
 }
 try {
     az -v | Out-Null
 } catch {
-    Write-Error "seems like you don't have the Azure CLI installed"
+    Write-Error 'seems like you don't have the Azure CLI installed'
 }
 Write-Host 'OK: local dependency check passed'
-Write-Warning "logging you out of Azure and Azure DevOps, just in case"
+Write-Warning 'logging you out of Azure and Azure DevOps, just in case'
 try {
     az logout *>$null
     $global:LoginInfo = $null
@@ -118,28 +118,28 @@ if (-Not (Test-Path "$PSScriptRoot/$ConfigFile")) {
     Write-Error "could not find config file under `"$PSScriptRoot/$ConfigFile`""
 }
 $Cfg = Get-Content "$PSScriptRoot/$ConfigFile" | ConvertFrom-Json
-if (-Not (Get-Member -inputobject $Cfg -name "devOpsRepoName")) {
+if (-Not (Get-Member -inputobject $Cfg -name 'devOpsRepoName')) {
     Write-ToObj $Cfg "devOpsRepoName" "$($Cfg.azureResourcesPrefix)"
 }
-$CreateKeyVault = (Get-Member -inputobject $Cfg -name "createKeyVault") -and $Cfg.createKeyVault
+$CreateKeyVault = (Get-Member -inputobject $Cfg -name 'createKeyVault') -and $Cfg.createKeyVault
 if (-Not $CreateKeyVault) {
-    Write-Warning "will be skipping the creation of a Key Vault"
+    Write-Warning 'will be skipping the creation of a Key Vault'
 }
-$CreateMinApprovalPolicy = (Get-Member -inputobject $Cfg -name "defaultPullReviewerMailAddresses") -and $Cfg.defaultPullReviewerMailAddresses.Length -ge 3
+$CreateMinApprovalPolicy = (Get-Member -inputobject $Cfg -name 'defaultPullReviewerMailAddresses') -and $Cfg.defaultPullReviewerMailAddresses.Length -ge 3
 if (-Not $CreateMinApprovalPolicy) {
     Write-Warning 'will be skipping the creation of a policy for minimum PR approval count because there are not enough values specified under "defaultPullReviewerMailAddresses"'
 }
-$CreateAlerts = (Get-Member -inputobject $Cfg -name "alertRecipientMailAddresses") -and $Cfg.alertRecipientMailAddresses.Length -ge 1
+$CreateAlerts = (Get-Member -inputobject $Cfg -name 'alertRecipientMailAddresses') -and $Cfg.alertRecipientMailAddresses.Length -ge 1
 if (-Not $CreateAlerts) {
     Write-Warning 'will be skipping the creation of E-Mail alerts because there are not enough values specified under "alertRecipientMailAddresses"'
 }
 Write-Host 'OK: read config file'
 
 Write-Host '=======Overriding configuration provided via config file with given command line arguments'
-if ($AzureStorageGeoLocation) { Write-ToObj $Cfg "azureStorageGeoLocation" $AzureStorageGeoLocation}
-if ($AzureResourcesPrefix) { Write-ToObj $Cfg "azureResourcesPrefix" $AzureResourcesPrefix}
-if ($DevOpsProject) { Write-ToObj $Cfg "devOpsProject" $DevOpsProject}
-if ($DevOpsOrg) { Write-ToObj $Cfg "devOpsOrg" $DevOpsOrg}
+if ($AzureStorageGeoLocation) { Write-ToObj $Cfg 'azureStorageGeoLocation' $AzureStorageGeoLocation}
+if ($AzureResourcesPrefix) { Write-ToObj $Cfg 'azureResourcesPrefix' $AzureResourcesPrefix}
+if ($DevOpsProject) { Write-ToObj $Cfg 'devOpsProject' $DevOpsProject}
+if ($DevOpsOrg) { Write-ToObj $Cfg 'devOpsOrg' $DevOpsOrg}
 
 $RepoUrl = -join($Cfg.devOpsOrg, '/', $Cfg.devOpsProject, '/_git/', $Cfg.devOpsRepoName)
 $PrefixQuery = "[?starts_with(name, '$($Cfg.azureResourcesPrefix)') || starts_with(name, '$($Cfg.azureResourcesPrefix.ToLower())')]"
@@ -147,17 +147,17 @@ $LinuxFxVersion = -join('"PYTHON|', "$($Cfg.pythonVersion)", '"')
 
 Write-Host '=======Validating configuration'
 $ExpectedKeys = @(
-    "azureResourcesPrefix",
-    "aspTier",
-    "pythonVersion",
-    "devOpsProject",
-    "devOpsOrg"
+    'azureResourcesPrefix',
+    'aspTier',
+    'pythonVersion',
+    'devOpsProject',
+    'devOpsOrg'
 )
 if (-Not (Assert-Keys-Exist $Cfg -Keys $ExpectedKeys)) {
-    Write-Error "invalid config file: missing required keys"
+    Write-Error 'invalid config file: missing required keys'
 }
 if (-Not $Cfg.aspTier.StartsWith('P')) {
-    Write-Error "this project currently only supports Premium Service Plan options since they are required for deployment slot usage (which are used for QA and currently baked into the PPL)"
+    Write-Error 'this project currently only supports Premium Service Plan options since they are required for deployment slot usage (which are used for QA and currently baked into the PPL)'
 }
 if ($AbsoluteTargetRepoPathPrefix) {
 
@@ -166,11 +166,11 @@ if ($AbsoluteTargetRepoPathPrefix) {
         Write-Host 'OK: path validation passed'
         $TargetRepoPathPrefix = $AbsoluteTargetRepoPathPrefix
     } else {
-        Write-Error 'The given path is invalid'
+        Write-Error 'the given path is invalid'
     }
 }
 if (Test-Path "$TargetRepoPathPrefix/$($Cfg.devOpsRepoName)") {
-    Write-Warning "the path given as a destination for the local clone of the git repo already exists, please either specify a different name or delete the folder"
+    Write-Warning 'the path given as a destination for the local clone of the git repo already exists, please either specify a different name or delete the folder'
     Write-Error "`"$TargetRepoPathPrefix/$($Cfg.devOpsRepoName)`" already exists"
 }
 Write-Host '=======Performing Azure DevOps prevalidation'
@@ -189,17 +189,17 @@ try {
 Write-Host '=======Starting prevalidation regarding existing Azure resources'
 Login-PersistInfo -NoCleanup # fine because of finally block
 try {
-    $Rg = Identify-ResourceToReuse "group" $true
-    $Sa = Identify-ResourceToReuse "storage account"
-    $Asp = Identify-ResourceToReuse "appservice plan"
-    $Fa = Identify-ResourceToReuse "functionapp"
-    $Kv = Identify-ResourceToReuse "keyvault"
+    $Rg = Identify-ResourceToReuse 'group' $true
+    $Sa = Identify-ResourceToReuse 'storage account'
+    $Asp = Identify-ResourceToReuse 'appservice plan'
+    $Fa = Identify-ResourceToReuse 'functionapp'
+    $Kv = Identify-ResourceToReuse 'keyvault'
     Write-Host 'OK: state in Azure did not warrant an abort'
     Write-Host 'OK: prevalidation ran through successfully'
     if ($PrevalidationOnly) {
-        Ask-ToConfirmElseExit -Question "Are you certain you want to proceed?" -Header "Azure Resource provisioning" -Force
+        Ask-ToConfirmElseExit -Question 'Are you certain you want to proceed?' -Header 'Azure Resource provisioning' -Force
     } else {
-        Ask-ToConfirmElseExit -Question "Are you certain you want to proceed?" -Header "Azure Resource provisioning"
+        Ask-ToConfirmElseExit -Question 'Are you certain you want to proceed?' -Header 'Azure Resource provisioning'
     }
 
     Write-Host '=====Starting creation of Azure resources'
@@ -230,16 +230,16 @@ try {
 
         Write-Host '=======Creating a deployment slot in the Function App for testing purposes'
         az functionapp deployment slot create -g "$($Rg.name)" -n "$($Cfg.azureResourcesPrefix)-fa" --slot 'test' | Out-Null
-        Write-Host "OK: created new deployment slot"
+        Write-Host 'OK: created new deployment slot'
     } else {
-        Write-Warning "using existing deployment slot"
+        Write-Warning 'using existing deployment slot'
     }
     $TSlotIdentityRes = az functionapp identity assign -g "$($Rg.name)" -n "$($Cfg.azureResourcesPrefix)-fa" --identities '[system]' --slot 'test' --output json | ConvertFrom-Json
     if ($CreateKeyVault) {
         if ($Kv -eq $null) {
 
             Write-Host '=======Creating the Key Vault'
-            if (Get-Member -inputobject $Cfg -name "keyVaultNameSuffix") {
+            if (Get-Member -inputobject $Cfg -name 'keyVaultNameSuffix') {
                 $KvName = "$($Cfg.azureResourcesPrefix)-kv$($Cfg.keyVaultNameSuffix)"
             } else {
                 $KvName = "$($Cfg.azureResourcesPrefix)-kv"
@@ -247,14 +247,14 @@ try {
             $Kv = az keyvault create -g "$($Rg.name)" -n $KvName -l "$($Cfg.azureStorageGeoLocation)" --enable-rbac-authorization false --output json | ConvertFrom-Json
             Write-Host "OK: created Key Vault `"$($Kv.name)`""
         }
-        $ManagedSp = (az ad sp list --display-name "$($Fa.name)" --filter "servicePrincipalType eq 'ManagedIdentity'" --output json | ConvertFrom-Json) | Where-Object {-Not $_.displayName.EndsWith("/slots/test")}[0]
+        $ManagedSp = (az ad sp list --display-name "$($Fa.name)" --filter "servicePrincipalType eq 'ManagedIdentity'" --output json | ConvertFrom-Json) | Where-Object {-Not $_.displayName.EndsWith('/slots/test')}[0]
         # manually specifying -g as workaround for https://github.com/Azure/azure-cli/issues/27239
         az keyvault set-policy -g "$($Rg.name)" --name $Kv.name --object-id $ManagedSp.id --secret-permissions all | Out-Null
         # manually specifying -g as workaround for https://github.com/Azure/azure-cli/issues/27239
         az keyvault set-policy -g "$($Rg.name)" --name $Kv.name --object-id $TSlotIdentityRes.principalId --secret-permissions all | Out-Null
 
         Write-Host '=======Creating a Secret with name "ExampleSecret"'
-        Set-KvSecret $Kv.name "ExampleSecret" "1234"
+        Set-KvSecret $Kv.name 'ExampleSecret' '1234'
     }
     if ($CreateAlerts) {
 
@@ -263,13 +263,13 @@ try {
         foreach ( $Email in $Cfg.alertRecipientMailAddresses ) {
             $ActionGroupCreationCmd += " -a `"email`" `"$Email`" `"$Email`""
         }
-        $ActionGroupCreationCmd += " | Out-Null"
+        $ActionGroupCreationCmd += ' | Out-Null'
         Invoke-Expression $ActionGroupCreationCmd
         $MetricAlertScope = "/subscriptions/$($LoginInfo.id)/resourceGroups/$($Rg.name)/providers/Microsoft.Web/serverfarms/$($Asp.name)"
         $ActionGroupPath = "/subscriptions/$($LoginInfo.id)/resourceGroups/$($Rg.name)/providers/Microsoft.Insights/actionGroups/Mailalerts"
-        az monitor metrics alert create --condition "avg CpuPercentage > 90" -n "CPU alert - average percentage over 90" -g "$($Rg.name)" --scopes $MetricAlertScope -a $ActionGroupPath --evaluation-frequency "30m" --window-size "30m" --auto-mitigate false | Out-Null
-        az monitor metrics alert create --condition "max MemoryPercentage > 90" -n "Memory alert - maximum percentage over 90" -g "$($Rg.name)" --scopes $MetricAlertScope -a $ActionGroupPath --evaluation-frequency "1h" --window-size "1h" --auto-mitigate false | Out-Null
-        az monitor scheduled-query create -g "$($Rg.name)" -n "Exception alert - detected exceptions during last hour" --scopes "/subscriptions/$($LoginInfo.id)/resourceGroups/$($Rg.name)/providers/Microsoft.Insights/components/$($Fa.name)" --action-group $ActionGroupPath --condition "count 'Arg0' > 0" --condition-query Arg0="exceptions" --window-size "1h" --evaluation-frequency "1h" --auto-mitigate false | Out-Null
+        az monitor metrics alert create --condition 'avg CpuPercentage > 90' -n 'CPU alert - average percentage over 90' -g "$($Rg.name)" --scopes $MetricAlertScope -a $ActionGroupPath --evaluation-frequency '30m' --window-size '30m' --auto-mitigate false | Out-Null
+        az monitor metrics alert create --condition 'max MemoryPercentage > 90' -n 'Memory alert - maximum percentage over 90' -g "$($Rg.name)" --scopes $MetricAlertScope -a $ActionGroupPath --evaluation-frequency '1h' --window-size '1h' --auto-mitigate false | Out-Null
+        az monitor scheduled-query create -g "$($Rg.name)" -n 'Exception alert - detected exceptions during last hour' --scopes "/subscriptions/$($LoginInfo.id)/resourceGroups/$($Rg.name)/providers/Microsoft.Insights/components/$($Fa.name)" --action-group $ActionGroupPath --condition "count 'Arg0' > 0" --condition-query Arg0='exceptions' --window-size '1h' --evaluation-frequency '1h' --auto-mitigate false | Out-Null
         Write-Host 'OK: created E-Mail alerts'
     }
     $EndpointTargetInfo = $LoginInfo
@@ -395,25 +395,25 @@ function Login-ToDevOpsWriteInfo() {
 
 function Identify-ResourceToReuse([string]$ResourceType, [bool]$ReuseOnly) {
     switch ($ResourceType) {
-        "group" {
+        'group' {
             $FoundResources = az group list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Resource Groups"
+            $Descriptor = 'Resource Groups'
         }
-        "functionapp" {
+        'functionapp' {
             $FoundResources = az functionapp list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Function Apps"
+            $Descriptor = 'Function Apps'
         }
-        "appservice plan" {
+        'appservice plan' {
             $FoundResources = az appservice plan list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "App Service Plans"
+            $Descriptor = 'App Service Plans'
         }
-        "storage account" {
+        'storage account' {
             $FoundResources = az storage account list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Storage Accounts"
+            $Descriptor = 'Storage Accounts'
         }
-        "keyvault" {
+        'keyvault' {
             $FoundResources = az keyvault list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
-            $Descriptor = "Key Vaults"
+            $Descriptor = 'Key Vaults'
         }
         default {
             Write-Error "`"Identify-ResourceToReuse`" received unexpected parameter"
@@ -432,4 +432,16 @@ function Identify-ResourceToReuse([string]$ResourceType, [bool]$ReuseOnly) {
     } else {
         Write-Error "found $($FoundResources.length) $Descriptor matching the configured prefix, 1 or 0 would have been acceptable"
     }
+}
+
+function Perform-EarlyAzLogout() {
+    az logout
+    $global:LoginInfo = $null
+    Write-Host 'OK: logged out of Azure'
+}
+
+function Perform-EarlyDevOpsLogout() {
+    az devops logout
+    $global:DevOpsPat = $null
+    Write-Host 'OK: logged out of Azure DevOps'
 }
