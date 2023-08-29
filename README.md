@@ -61,7 +61,7 @@ the following is a description of the setup in Azure DevOps:
   - PRs that cause failing tests are blocked from merging until all unittests are passed
   - this policy, together with the test slot mentioned above (which is used as a deployment target instead of PROD when the pipeline runs for changes proposed in a PR) enables you to verify new versions of your code in a safe, isolated environment, even if you haven't bothered to keep your code covered with unittests
 
-TODO \<insert anatomy of deployment, hosting & runtime interactions (depicts code lifecycle stages)\>
+![code lifecycle stages: anatomy of deployment, hosting and runtime interactions](./readme_attachments/function_code_hosting_anatomy.png)
 
 ### Monitoring and alerting
 - this project contains code that can plot graphs in the console; calls [Show-Graph](https://gist.github.com/PrateekKumarSingh/9168afa8e7c7da801efa858705fb485b) under the hood
