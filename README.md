@@ -53,7 +53,9 @@ the following is a description of the setup in Azure DevOps:
     - when deploying your code, the pipeline also configures the appsettings of your Function App according to the "appsettings.json" file that is tracked by git
       - this way, changes to environment variables are also subject to peer reviews, are tracked over time and can thus be traced retroactively
       - just make sure to never directly store credentials in the mentioned JSON file; instead, store them as a secret in the Key Vault as shown in the corresponding function samples (you do need a Key Vault reference in the appsettings file though, as shown here)
-    - the pipeline also integrates with the builtin Azure Devops test reporting feature TODO \<insert screenshot of example test report\>
+    - the pipeline also integrates with the builtin Azure Devops test reporting feature
+    ![test report example](./readme_attachments/ppl_test_report.png)
+    ![failed test pipeline run example](./readme_attachments/ppl_failed_test_summary.png)
 - repository policy ensuring PRs targeting main can't get merged unless they have at least 2 approvers
 - build policy that ensures pending changes get deployed to the test slot once a PR is created
   - PRs that cause failing tests are blocked from merging until all unittests are passed
@@ -65,6 +67,7 @@ TODO \<insert anatomy of deployment, hosting & runtime interactions (depicts cod
 - this project contains code that can plot graphs in the console; calls [Show-Graph](https://gist.github.com/PrateekKumarSingh/9168afa8e7c7da801efa858705fb485b) under the hood
   - graphical monitoring is available via "Show-FaMetric" which can display CPU and memory workload
   - displaying key metrics over configurable spans of times like that can help you recognize patterns at first glance you might have missed otherwise
+  ![Show-FaMetric example](./readme_attachments/show_fametric_example_usage.png)
 - by default (if the condition described in the provisioning section above is met in the config file), you will receive E-Mail alerts pertaining to your function
   - there is a metric alert rule that triggers if the average CPU percentage is over 90
   - there is a metric alert rule that triggers if the maximum memory usage percentage is over 90
