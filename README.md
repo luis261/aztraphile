@@ -23,10 +23,10 @@ the following resources are created by the main script:
   - contains a test slot that's configured to be an environment nearly identical to PROD
     - it is also a target for automatic deployments (in particular: deployments resulting from the build validation policy that get's triggered on the creation of new PRs)
 - Application Insights
-- Key Vault (only created if "createKeyVault" is set to true in the config file)
+- Key Vault (only created if ```createKeyVault``` is set to ```true``` in the config file)
   - can securely store confidential data (such as API credentials) in the form of secrets
   - a secret with name "ExampleSecret" is created by default, you can use it for experimentation purposes
-- Action Group (only gets created if there is at least one E-Mail address in the config file under "alertRecipientMailAddresses", otherwise NO alerts are created)
+- Action Group (only gets created if there is at least one E-Mail address in the config file under ```alertRecipientMailAddresses```, otherwise NO alerts are created)
   - handles the sending of E-Mail alerts specified in the monitoring section below
   - having automated E-Mail alerts in place means you don't have to proactively check the status of your Functions
 
@@ -47,10 +47,10 @@ the project ships with these pre-written Function samples so you don't have to w
 the following is a description of the setup in Azure DevOps:
 - Service Connection (needed to connect to Azure from the Azure Devops pipeline when conducting the automatic deployments)
 - git repository to hold your code/the sample functions
-- pipeline defined by an azure-pipelines.yml file which carries out the testing and deployment process
+- pipeline defined by an ```azure-pipelines.yml``` file which carries out the testing and deployment process
     - automatically deploys the latest commit on the main branch to Azure
     - variables for that pipeline that allow you to parameterize certain aspects relating to your code in Azure, e.g. configuring a CRON schedule for your test slot that differs from the one used productively (to avoid load interference)
-    - when deploying your code, the pipeline also configures the appsettings of your Function App according to the "appsettings.json" file that is tracked by git
+    - when deploying your code, the pipeline also configures the appsettings of your Function App according to ```appsettings.json``` (which is tracked by git)
       - this way, changes to environment variables are also subject to peer reviews, are tracked over time and can thus be traced retroactively
       - just make sure to never directly store credentials in the mentioned JSON file; instead, store them as a secret in the Key Vault as shown in the corresponding function samples (you do need a Key Vault reference in the appsettings file though, as shown here)
     - the pipeline also integrates with the builtin Azure Devops test reporting feature
@@ -61,27 +61,27 @@ the following is a description of the setup in Azure DevOps:
   - PRs that cause failing tests are blocked from merging until all unittests are passed
   - this policy, together with the test slot mentioned above (which is used as a deployment target instead of PROD when the pipeline runs for changes proposed in a PR) enables you to verify new versions of your code in a safe, isolated environment, even if you haven't bothered to keep your code covered with unittests
 
-#### Example anatomy showing deployment, hosting and runtime interactions of Azure Function code going through different lifecycle stages
+#### Example anatomy showing deployment, hosting and runtime interactions of Azure Function code in different lifecycle stages
 ![code lifecycle stages: anatomy of deployment, hosting and runtime interactions](./readme_attachments/function_code_hosting_anatomy.png)
 
 ### Monitoring and alerting
 - this project contains code that can plot graphs in the console; calls [Show-Graph](https://gist.github.com/PrateekKumarSingh/9168afa8e7c7da801efa858705fb485b) under the hood
-  - graphical monitoring is available via "Show-FaMetric" which can display CPU and memory workload
+  - graphical monitoring is available via ```Show-FaMetric``` which can display CPU and memory workload
   - displaying key metrics over configurable spans of times like that can help you recognize patterns at first glance you might have missed otherwise
   ![Show-FaMetric example](./readme_attachments/show_fametric_example_usage.png)
 - by default (if the condition described in the provisioning section above is met in the config file), you will receive E-Mail alerts pertaining to your function
   - there is a metric alert rule that triggers if the average CPU percentage is over 90
   - there is a metric alert rule that triggers if the maximum memory usage percentage is over 90
   - additionally, a log search alert rule is created that activates if any exceptions occurred in the execution of your Functions during the last hour
-- instead of using such builtin push-based constructs, you could easily opt for a polling-based approach by running queries periodically using "Fetch-FaMetrics" and "Fetch-FaInsights" (a simple example of expre-built keyword filtering for Fetchfainsights is shown in the "Advanced features" section, you can go explore the code or run the Get-Help commandlet on the mentioned utility functions for in-depth documentation)
+- instead of using such builtin push-based constructs, you could easily opt for a polling-based approach by running queries periodically using ```Fetch-FaMetric``` and ```Fetch-FaInsights``` (a simple example of applying keyword message filtering to the results of ```Fetch-FaInsights``` is shown in the "Advanced usage" section, you can go explore the code or run the Get-Help commandlet on the mentioned utility functions for in-depth documentation)
 
 ### Additional orchestration features
 there are lots of orchestration/utility features in the form of powershell functions stored in ```aztra-utils.ps1```. You can run them locally, so you don't have to bother with the Azure portal
-- ```Set-AzPipelinesVar``` can create/update DevOps build variables for you
-- ```Create-StorageContainer``` let's you create Storage Containers
 - ```Set-KvSecret``` let's you create secrets
-- ```Restart-FunctionCompletely``` performs a full restart on a Function App; you can also shut it off prematurely to keep the App shut off (charges still apply)
+- ```Create-StorageContainer``` can create Storage Containers for you
+- ```Restart-FunctionAppCompletely``` performs a full restart on a Function App; you can also shut it off prematurely to keep the App shut off (charges still apply)
 - ```Invoke-Function``` let's you call a Function via it's HTTP API
+- ```Set-AzPipelinesVar``` is used to create/update Azure DevOps build variables
 
 ## Advanced usage
 - you can try to be extra smart about your testing strategy and achieve a level of efficiency that's usually only achievable with proper suites of unittests even without covering your code and maintaining those tests
