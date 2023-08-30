@@ -27,7 +27,7 @@ the following resources are created by the main script:
   - can securely store confidential data (such as API credentials) in the form of secrets
   - a secret with name "ExampleSecret" is created by default, you can use it for experimentation purposes
 - Action Group (only gets created if there is at least one E-Mail address in the config file under ```alertRecipientMailAddresses```, otherwise NO alerts are created)
-  - handles the sending of E-Mail alerts specified in the monitoring section below
+  - handles the sending of E-Mail alerts specified in the [monitoring section below](#monitoring-and-alerting)
   - having automated E-Mail alerts in place means you don't have to proactively check the status of your Functions
 
 ![overview diagramm of resulting Azure architecture as setup by the script](./readme_attachments/azure_overview.png)
@@ -38,7 +38,7 @@ the project ships with these pre-written Function samples so you don't have to w
 - HTTP Function that reads a secret from the keyvault (so you have code you can reference showing how to properly store credentials your code needs to access)
 - Timer triggered Function
 - HTTP Function that copies a Blob file
-- Timer triggered Function that logs to a Blob file (and another function that periodically clears that file)
+- Timer triggered Function that logs to a Blob file (and another Function that periodically clears that file)
 - there are unittest samples for all of these Functions (written using pytest)
   - since you inherit a functioning assortment of tests that are properly integrated into your deployment process from the start, the usual entry barrier of having to setup a test-suite from scratch is avoided
   - this way, you can make it a habit to using automated testing for your Azure Functions from the start instead of putting it off and accruing tech debt over time
