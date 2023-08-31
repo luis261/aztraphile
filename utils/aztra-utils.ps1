@@ -301,27 +301,30 @@ function Restart-FunctionAppCompletely {
     Ensure-LoggedIn
     Ensure-RgToInspectSet
 
-    Write-Warning "Stopping $FunctionAppName"
     if ($Slot) {
+        Write-Warning "Stopping `"$FunctionAppName/$Slot`""
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
+        Write-Warning "Stopping `"$FunctionAppName`""
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName
     }
     Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
-    Write-Warning "Starting $FunctionAppName"
     if ($Slot) {
+        Write-Warning "Starting `"$FunctionAppName/$Slot`""
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
+        Write-Warning "Starting `"$FunctionAppName`""
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName
     }
     Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
 
-    Write-Warning "Restarting $FunctionAppName"
     if ($Slot) {
+        Write-Warning "Restarting `"$FunctionAppName/$Slot`""
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
+        Write-Warning "Restarting `"$FunctionAppName`""
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName
     }
     Write-Warning 'Waiting for 60 seconds'
