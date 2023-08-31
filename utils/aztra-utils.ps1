@@ -331,6 +331,7 @@ function Restart-FunctionAppCompletely {
     Start-Sleep -Seconds 60
 }
 
+# new version including $Slot param depends on https://github.com/Azure/azure-cli/issues/27297
 function Invoke-Function {
     param(
         [string]
