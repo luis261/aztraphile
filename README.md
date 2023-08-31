@@ -38,7 +38,7 @@ the project ships with these pre-written Function samples so you don't have to w
 - [HTTP Function that reads a secret from the keyvault](./function-samples/http_keyvault_function_sample.py) (so you have code you can reference showing how to properly store credentials your code needs to access)
 - [Timer triggered Function](./function-samples/timer_function_sample.py)
 - [HTTP Function that copies a Blob file](./function-samples/http_blob_replicating_function_sample.py)
-- [Timer triggered Function that logs to a Blob file](./function_samples/timer_blob_logging_functions_sample.py) (and another Function that periodically clears that file)
+- [Timer triggered Function that logs to a Blob file](./function-samples/timer_blob_logging_functions_sample.py) (and another Function that periodically clears that file)
 - there are unittest samples for all of these Functions (written using pytest)
   - since you inherit a functioning assortment of tests that are properly integrated into your deployment process from the start, the usual entry barrier of having to setup a test-suite from scratch is avoided
   - this way, you can make it a habit to using automated testing for your Azure Functions from the start instead of putting it off and accruing tech debt over time
