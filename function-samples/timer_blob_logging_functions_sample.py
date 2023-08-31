@@ -6,10 +6,7 @@ import logging
 app = func.FunctionApp()
 
 # in order for this function to run as intended, you will need to specify paths pointing to a valid storage container
-# I have provided an easy way to create such containers via a powershell function named "Create-StorageContainer";
-# to utilize it, just start a powershell session and import "aztra_utils.ps1":
-# your-ps-prompt>. .\utils\aztra_utils.ps1
-# then call "Create-StorageContainer" as such:
+# I have provided an easy way to create such containers via a powershell function named "Create-StorageContainer":
 # your-ps-prompt>Create-StorageContainer "YourFunctionContainingGroup-rg" "yourstorageaccountsa" "test-slot-blobcontainer"
 # after creating the storage container that will contain the blob file, you will need to setup (upload) a file (log.txt) that should be used as a target to write to by the sample functions
 
