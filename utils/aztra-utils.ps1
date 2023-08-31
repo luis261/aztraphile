@@ -340,15 +340,22 @@ function Invoke-Function {
         [string]
         # name of the Azure Function to invoke
         [Parameter(Mandatory)]
-        $FunctionName
+        $FunctionName,
+        [string]
+        # name of the deployment slot (omit/leave empty in case of default slot)
+        $Slot
     )
 
     Ensure-LoggedIn
     Ensure-RgToInspectSet
 
-    $FunctionKey = ((az functionapp keys list -g $ResourceGroupToInspect -n $FunctionAppName | ConvertFrom-Json).functionKeys).default
-
-    $CallUrl = (az functionapp function show -g $ResourceGroupToInspect -n $FunctionAppName --function-name $FunctionName | ConvertFrom-Json).invokeUrlTemplate
+    if ($Slot) {
+        $FunctionKey = ((az functionapp keys list -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot | ConvertFrom-Json).functionKeys).default
+        $CallUrl = (az functionapp function show -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot --function-name $FunctionName | ConvertFrom-Json).invokeUrlTemplate
+    } else {
+        $FunctionKey = ((az functionapp keys list -g $ResourceGroupToInspect -n $FunctionAppName | ConvertFrom-Json).functionKeys).default
+        $CallUrl = (az functionapp function show -g $ResourceGroupToInspect -n $FunctionAppName --function-name $FunctionName | ConvertFrom-Json).invokeUrlTemplate
+    }
 
     Invoke-WebRequest -Uri "${CallUrl}?code=$FunctionKey"
 }
