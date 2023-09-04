@@ -302,32 +302,32 @@ function Restart-FunctionAppCompletely {
     Ensure-RgToInspectSet
 
     if ($Slot) {
-        Write-Warning "Stopping `"$FunctionAppName/$Slot`""
+        Write-Warning "stopping `"$FunctionAppName/$Slot`""
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
-        Write-Warning "Stopping `"$FunctionAppName`""
+        Write-Warning "stopping `"$FunctionAppName`""
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Warning 'Waiting for 60 seconds'
+    Write-Warning 'waiting for 60 seconds'
     Start-Sleep -Seconds 60
     if ($Slot) {
-        Write-Warning "Starting `"$FunctionAppName/$Slot`""
+        Write-Warning "starting `"$FunctionAppName/$Slot`""
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
-        Write-Warning "Starting `"$FunctionAppName`""
+        Write-Warning "starting `"$FunctionAppName`""
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Warning 'Waiting for 60 seconds'
+    Write-Warning 'waiting for 60 seconds'
     Start-Sleep -Seconds 60
 
     if ($Slot) {
-        Write-Warning "Restarting `"$FunctionAppName/$Slot`""
+        Write-Warning "restarting `"$FunctionAppName/$Slot`""
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
-        Write-Warning "Restarting `"$FunctionAppName`""
+        Write-Warning "restarting `"$FunctionAppName`""
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Warning 'Waiting for 60 seconds'
+    Write-Warning 'waiting for 60 seconds'
     Start-Sleep -Seconds 60
 }
 

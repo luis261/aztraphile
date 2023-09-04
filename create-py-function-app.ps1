@@ -117,7 +117,7 @@ function Identify-ResourceToReuse([string]$ResourceType, [bool]$ReuseOnly) {
             $Descriptor = 'Key Vaults'
         }
         default {
-            Write-Error "`"Identify-ResourceToReuse`" received unexpected parameter"
+            Write-Error "`"Identify-ResourceToReuse`" received unexpected value: `"$ResourceType`""
         }
     }
 
@@ -178,7 +178,7 @@ if (-Not (Test-Path "$PSScriptRoot/$ConfigFile")) {
 }
 $Cfg = Get-Content "$PSScriptRoot/$ConfigFile" | ConvertFrom-Json
 if (-Not (Get-Member -inputobject $Cfg -name 'devOpsRepoName')) {
-    Write-ToObj $Cfg "devOpsRepoName" "$($Cfg.azureResourcesPrefix)"
+    Write-ToObj $Cfg 'devOpsRepoName' "$($Cfg.azureResourcesPrefix)"
 }
 $CreateKeyVault = (Get-Member -inputobject $Cfg -name 'createKeyVault') -and $Cfg.createKeyVault
 if (-Not $CreateKeyVault) {
