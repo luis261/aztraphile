@@ -11,6 +11,67 @@ $GitLogFile = "$(("$PSScriptRoot/.." | Resolve-Path).Path)/git.log"
 <#
 .SYNOPSIS
 
+Displays a live-plot of a metric (about an App Service Plan) in a new powershell window (separate process)
+
+.DESCRIPTION
+
+Wraps around "Fetch-FaMetric"
+
+.EXAMPLE
+
+PS> Show-LiveFaMetric -Metric MemoryPercentage -Interval 1m -Offset 60m -AppServicePlan 'YourASPHere'
+#>
+function Show-LiveFaMetric {
+    param(
+        [string]
+        # metric to be evaluated
+        [Parameter(Mandatory)]
+        [ValidateSet('CpuPercentage','MemoryPercentage')]
+        $Metric,
+        [int]
+        # offset between individual polls in seconds
+        $PollingInterval=60,
+        [string]
+        # size of time-bins
+        $Interval='24h',
+        [string]
+        # total timespan under observation
+        $Offset='28d',
+        [string]
+        # function used to transform each bins values to a single value
+        [ValidateSet('Average','Count','Maximum','Minimum','None','Total')]
+        $Aggregation='Maximum',
+        [string]
+        # target of the metric calculation/observation
+        [Parameter(Mandatory)]
+        $AppServicePlan
+    )
+
+    Ensure-LoggedIn
+    Ensure-RgToInspectSet
+
+    $Parameters = @{
+        FilePath = 'powershell'
+        ArgumentList = @(
+            '-NoExit',
+            '-WindowStyle Maximized',
+            "$PSScriptRoot/live-metric-payload.ps1",
+            "-Metric $Metric",
+            "-PollingInterval $PollingInterval"
+            "-Interval $Interval",
+            "-Offset $Offset",
+            "-Aggregation $Aggregation",
+            "-AppServicePlan $AppServicePlan",
+            "-SubscriptionId $($LoginInfo.id)",
+            "-ResourceGroupToInspect $ResourceGroupToInspect"
+        )
+    }
+    Start-Process @Parameters
+}
+
+<#
+.SYNOPSIS
+
 Displays metrics (about an App Service Plan) graphically
 
 .DESCRIPTION
@@ -56,7 +117,7 @@ function Show-FaMetric {
     $Stats = Fetch-FaMetric $Metric $Interval $Offset $Aggregation $AppServicePlan
     $PropertyName = $Aggregation.ToLower()
     $Values = $Stats.$PropertyName | ForEach-Object{ [double]::Parse([string]$_, [cultureinfo]$PSCulture) }
-    Show-Graph -Datapoints $Values -XAxisTitle "$Aggregation $Metric % in $Interval bins over last $Offset"
+    Show-Graph -Datapoints $Values -XAxisTitle "$Aggregation $Metric in $Interval bins over last $Offset"
 }
 
 <#
@@ -100,11 +161,25 @@ function Fetch-FaMetric {
         $Aggregation='Maximum',
         [string]
         # target of the metric calculation/observation
-        $AppServicePlan
+        $AppServicePlan,
+        [switch]
+        # bypasses the initial auth-check - useful in situations where performing the usual auth check based on the local scope is not feasible without additional overhead, e.g. when running in another process
+        $BypassScopeBasedChecks,
+        [string]
+        $DirectSubIdBypass,
+        [string]
+        # please set resource group target via "Set-GroupToInspect" instead
+        $DirectRgBypass
     )
 
-    Ensure-LoggedIn
-    Ensure-RgToInspectSet
+    if ($BypassScopeBasedChecks) {
+        $global:ResourceGroupToInspect = $DirectRgBypass
+        $SubscriptionId = $DirectSubIdBypass
+    } else {
+        Ensure-LoggedIn
+        $SubscriptionId = $LoginInfo.id
+        Ensure-RgToInspectSet
+    }
 
     if ($AppServicePlan -eq '') {
         Write-Warning 'no App Service Plan was specified, performing search in given Resource Group'
@@ -124,7 +199,7 @@ function Fetch-FaMetric {
         }
     }
 
-    $ResourceURI = "/subscriptions/$($LoginInfo.id)/resourceGroups/$ResourceGroupToInspect/providers/Microsoft.Web/serverfarms/$AppServicePlan"
+    $ResourceURI = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupToInspect/providers/Microsoft.Web/serverfarms/$AppServicePlan"
 
     $Res = az monitor metrics list --resource $ResourceURI --metrics $Metric --interval $Interval --offset $Offset --aggregation $Aggregation --output json | ConvertFrom-Json
 
@@ -505,10 +580,10 @@ function Ask-ToConfirmElseExit {
     [CmdletBinding()]
     Param([string]$Question, [string]$Header, [switch]$Force)
     if($Force -or (-Not $PSCmdlet.ShouldContinue($Question, $Header))) {
-        echo "Stopping as requested, instead of proceeding with $Header"
+        Write-Host "Stopping as requested, instead of proceeding with $Header"
         Exit 1
     }
-    echo "Proceeding as requested with $Header"
+    Write-Host "Proceeding as requested with $Header"
 }
 
 function Copy-ToIndex([string]$SelectionSpecifier, [string]$FetchPathPrefix, $Destination='.', $GitErrorAction='EXIT') {
