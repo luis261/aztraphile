@@ -99,4 +99,4 @@ there are lots of orchestration/utility features in the form of powershell funct
     - thus, the less vital consumers can act as an additional layer of validation in terms of testing
 - filtering logs based on their message ```Fetch-FaInsights -InsightsSpecifier "logs" -Raw | Where-Object (Build-LogMessageSieve "executed")```
 - polling of logs (live, without duplicated events) and optional filtering based on a passed query (coming soon)
-- live metric plotting in a console window (coming soon)
+- live metric plotting in a separate powershell window: via ```Show-LiveFaMetric```
