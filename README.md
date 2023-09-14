@@ -1,14 +1,29 @@
 # aztraphile
+
+Go from bare resource group to fully-fledged, **production-grade Python Azure Function App in only ten lines of config** (8 if you don't count the braces), like so:
+```
+{
+    "azureResourcesPrefix": "ReplaceWithYourDescriptiveGUID",
+    "defaultPullReviewerMailAddresses": [],
+    "aspTier": "P1V2",
+    "createKeyVault": true,
+    "pythonVersion": "3.10",
+    "devOpsProject": "ReplaceWithYourProjectName",
+    "devOpsOrg": "https://dev.azure.com/yourorg",
+    "alertRecipientMailAddresses": []
+}
+```
+
 ![startup GIF](./readme_attachments/startup.gif)
 
-## Introduction
+## Overview
 aztraphile 🌩️ is an automation tool intended to help you accelerate the process of rolling out new Python Azure Functions 🚀 as well as ensuring you are adequately equipped to keep those Functions running smoothly. Overall, it entails:
 - automated resource provisioning 🏗️ in Azure
 - pre-written code 📦 (and unittest 🔬) samples using the brand new V2 programming model for Python Azure Functions
 - automated setup of Azure DevOps constructs that assure quality 📋 while conducting continuous deployment ⚙️
 - flexible monitoring 💡 and alerting 🚨 setup capabilities designed to fit your needs
 
-## Feature summary/showcase
+## Feature catalogue and showcase
 ### Automated provisioning in Azure
 the following resources are created by the main script:
 - Storage Account
