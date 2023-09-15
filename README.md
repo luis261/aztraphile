@@ -1,6 +1,6 @@
 # aztraphile
 
-Go from bare resource group to fully-fledged, **production-grade Python Azure Function App in only ten lines of config** (8 if you don't count the braces), like so:
+Go from bare resource group to fully-fledged, **production-grade Python Azure Function App in only 8 lines of config** (10 if you count the braces), like so:
 ```
 {
     "azureResourcesPrefix": "ReplaceWithYourDescriptiveGUID",
