@@ -154,12 +154,12 @@ Write-Host '=======Checking local dependencies'
 try {
     git -v | Out-Null
 } catch {
-    Write-Error 'seems like you don't have git installed'
+    Write-Error "seems like you don't have git installed"
 }
 try {
     az -v | Out-Null
 } catch {
-    Write-Error 'seems like you don't have the Azure CLI installed'
+    Write-Error "seems like you don't have the Azure CLI installed"
 }
 Write-Host 'OK: local dependency check passed'
 Write-Warning 'logging you out of Azure and Azure DevOps, just in case'
