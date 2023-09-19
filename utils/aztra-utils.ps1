@@ -182,20 +182,20 @@ function Fetch-FaMetric {
     }
 
     if ($AppServicePlan -eq '') {
-        Write-Warning 'no App Service Plan was specified, performing search in given Resource Group'
+        Write-Warning 'No App Service Plan was specified, performing search in given resource group'
         $Res = az resource list -g $ResourceGroupToInspect --resource-type 'Microsoft.Web/serverFarms' --output json | ConvertFrom-Json
         try {
             $AspName = $Res.name
         } catch [System.Management.Automation.RuntimeException] {
             Write-Warning $_.Exception.Message
-            throw "the given Resource Group `"$ResourceGroupToInspect`" does not contain any App Service Plans"
+            throw "The given resource group `"$ResourceGroupToInspect`" does not contain any App Service Plans"
         }
 
         if ($AspName -is [array]) {
-            throw 'omitting the App Service Plan name is only permissible if there is exactly one App Service Plan in the given Resource Group'
+            throw 'Omitting the App Service Plan name is only permissible if there is exactly one App Service Plan in the given resource group'
         } else {
             $AppServicePlan = $AspName
-            Write-Warning "using App Service Plan `"$AppServicePlan`""
+            Write-Warning "Using App Service Plan `"$AppServicePlan`""
         }
     }
 
@@ -257,26 +257,26 @@ function Fetch-FaInsights([string]$InsightsSpecifier, [string]$Offset, [switch]$
     } else {
         try {
             if ([string]::IsNullOrEmpty($AppInsightsToQuery)) {
-                throw "please specify an Application Insights instance to query (via `"Set-InsightsToQuery`")"
+                throw "Please specify an Application Insights instance to query (via `"Set-InsightsToQuery`")"
             } else {
                 $AppInsights = $AppInsightsToQuery
             }
         } catch {
-            Write-Warning 'no insights instance was specified, performing search in given Resource Group'
+            Write-Warning 'No insights instance was specified, performing search in given resource group'
             $Res = az resource list -g $ResourceGroupToInspect --resource-type 'Microsoft.Insights/components' --output json | ConvertFrom-Json
             try {
                 $InsightsInstanceName = $Res.name
             } catch [System.Management.Automation.RuntimeException] {
                 Write-Warning $_.Exception.Message
-                throw "the given Resource Group `"$ResourceGroupToInspect`" does not contain any Application Insights instances"
+                throw "The given resource group `"$ResourceGroupToInspect`" does not contain any Application Insights instances"
             }
 
             if ($InsightsInstanceName -is [array]) {
-                throw "omitting the application insights name is only permissible if there is exactly one Application Insights instance in the given RG, please specify an instance to query (via `"Set-InsightsToQuery`")"
+                throw "Omitting the application insights name is only permissible if there is exactly one Application Insights instance in the given resource group, please specify an instance to query (via `"Set-InsightsToQuery`")"
             } else {
                 $AppInsights = $InsightsInstanceName
-                Write-Warning "using insights instance `"$AppInsights`""
-                Write-Warning "will use insights instance `"$AppInsights`" as default for further queries without explicit target in this session"
+                Write-Warning "Using insights instance `"$AppInsights`""
+                Write-Warning "Will use insights instance `"$AppInsights`" as default for further queries without explicit target in this session"
                 Set-InsightsToQuery $AppInsights
             }
         }
@@ -306,12 +306,12 @@ function Fetch-FaInsights([string]$InsightsSpecifier, [string]$Offset, [switch]$
                 $ColumnsToSelect = @('operation_Name','timestamp','innermostMessage')
             }
             default {
-                throw "unsupported InsightsSpecifier: `"$InsightsSpecifier`""
+                throw "Unsupported InsightsSpecifier: `"$InsightsSpecifier`""
             }
         }
     } catch {
         if (-Not ($_.Exception.Message -ilike '*unsupported InsightsSpecifier*')) {
-            Write-Warning "unsetting `"AppInsightsToQuery`" because an error occurred"
+            Write-Warning "Unsetting `"AppInsightsToQuery`" because an error occurred"
             Set-InsightsToQuery ''
         }
         throw $_
@@ -346,7 +346,7 @@ function Create-StorageContainer([string]$ResourceGroup, [string]$StorageAccount
     $ConnectionRes = az storage account show-connection-string -g $ResourceGroup -n $StorageAccount --output json | ConvertFrom-Json
     $ContainerRes = az storage container exists -n $ContainerName --connection-string "$($ConnectionRes.connectionString)" --output json | ConvertFrom-Json
     if ($ContainerRes.exists) {
-        Write-Warning 'a container with the given name already exists, skipping creation'
+        Write-Warning 'A container with the given name already exists, skipping creation'
         return $null
     } else {
         return az storage container create -n $ContainerName --connection-string "($($ConnectionRes.connectionString)"
@@ -377,32 +377,32 @@ function Restart-FunctionAppCompletely {
     Ensure-RgToInspectSet
 
     if ($Slot) {
-        Write-Warning "stopping `"$FunctionAppName/$Slot`""
+        Write-Warning "Stopping `"$FunctionAppName/$Slot`""
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
-        Write-Warning "stopping `"$FunctionAppName`""
+        Write-Warning "Stopping `"$FunctionAppName`""
         az functionapp stop -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Warning 'waiting for 60 seconds'
+    Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
     if ($Slot) {
-        Write-Warning "starting `"$FunctionAppName/$Slot`""
+        Write-Warning "Starting `"$FunctionAppName/$Slot`""
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
-        Write-Warning "starting `"$FunctionAppName`""
+        Write-Warning "Starting `"$FunctionAppName`""
         az functionapp start -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Warning 'waiting for 60 seconds'
+    Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
 
     if ($Slot) {
-        Write-Warning "restarting `"$FunctionAppName/$Slot`""
+        Write-Warning "Restarting `"$FunctionAppName/$Slot`""
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName --slot $Slot
     } else {
-        Write-Warning "restarting `"$FunctionAppName`""
+        Write-Warning "Restarting `"$FunctionAppName`""
         az functionapp restart -g $ResourceGroupToInspect -n $FunctionAppName
     }
-    Write-Warning 'waiting for 60 seconds'
+    Write-Warning 'Waiting for 60 seconds'
     Start-Sleep -Seconds 60
 }
 
@@ -442,7 +442,7 @@ function Set-AzPipelinesVar($PipelineNamePrefix, $VariableName, $Value) {
 function Set-GroupToInspect {
     param(
         [string]
-        # Resource Group to be used as target for other utility functions
+        # resource group to be used as target for other utility functions
         [Parameter(Mandatory)]
         [ArgumentCompleter({
             param ($commandName,
@@ -454,7 +454,7 @@ function Set-GroupToInspect {
         })]
         $ResourceGroup
     )
-    Write-Warning "`"$ResourceGroup`" will now be used as the default Resource Group, you can change that via calling `"Set-GroupToInspect`" directly"
+    Write-Warning "`"$ResourceGroup`" will now be used as the default resource group, you can change that via calling `"Set-GroupToInspect`" directly"
     $global:ResourceGroupToInspect = $ResourceGroup
 }
 
@@ -481,7 +481,7 @@ function Login-PersistInfo([switch]$NoCleanup) {
             }
         } | Out-Null
     }
-    Write-Host 'OK: authenticated against Azure'
+    Write-Host 'OK: Authenticated against Azure'
 }
 
 function Login-ToDevOps($DevOpsOrg, $Project, [switch]$NoCleanup) {
@@ -521,7 +521,7 @@ function Login-ToDevOps($DevOpsOrg, $Project, [switch]$NoCleanup) {
     }
 
     az devops configure --defaults organization=$DevOpsOrg project=$Project *>$null
-    Write-Host "OK: authenticated and configured with the defaults of `"$Project`" in `"$DevOpsOrg`""
+    Write-Host "OK: Authenticated and configured with the defaults of `"$Project`" in `"$DevOpsOrg`""
 }
 
 
@@ -567,10 +567,10 @@ function Ensure-LoggedIn() {
 function Ensure-RgToInspectSet() {
     try {
         if ([string]::IsNullOrEmpty($ResourceGroupToInspect)) {
-            throw "please specify a resource group to inspect (via `"Set-GroupToInspect`")"
+            throw "Please specify a resource group to inspect (via `"Set-GroupToInspect`")"
         }
     } catch {
-        $RgInput = Read-Host 'please specify which resource group to target'
+        $RgInput = Read-Host 'Please specify which resource group to target'
         Set-GroupToInspect $RgInput
     }
 }
@@ -578,7 +578,7 @@ function Ensure-RgToInspectSet() {
 
 function Ask-ToConfirmElseExit {
     [CmdletBinding()]
-    Param([string]$Question, [string]$Header, [switch]$Force)
+    param([string]$Question, [string]$Header, [switch]$Force)
     if($Force -or (-Not $PSCmdlet.ShouldContinue($Question, $Header))) {
         Write-Host "Stopping as requested, instead of proceeding with $Header"
         Exit 1
@@ -634,7 +634,7 @@ function Assert-Keys-Exist($TargetObject, $Keys, [switch]$Silent) {
     foreach ($Key in $Keys) {
         if (-Not (Get-Member -inputobject $TargetObject -name $Key)) {
             if ($Silent) {} else {
-                Write-Warning "the given object is missing a member with name $Key"
+                Write-Warning "The given object is missing a member with name $Key"
             }
             $Flag = $false
         }
@@ -647,11 +647,11 @@ function Write-ToObj($TargetObject, [string]$Key, $Value, [switch]$Silent, [swit
     if (Get-Member -inputobject $TargetObject -name $Key) {
         if ($NoOverwrite) {
             if ($Silent) {} else {
-                Write-Warning "not setting `"$Key`" on the given object: it's already set to `"$($TargetObject.$Key)`""
+                Write-Warning "Not setting `"$Key`" on the given object: it's already set to `"$($TargetObject.$Key)`""
             }
         } else {
             if ($Silent) {} else {
-                Write-Warning "overwriting value `"$($TargetObject.$Key)`" under `"$Key`" with `"$Value`""
+                Write-Warning "Overwriting value `"$($TargetObject.$Key)`" under `"$Key`" with `"$Value`""
             }
             $TargetObject | Add-Member -Name $Key -Type NoteProperty -Value $Value -Force
         }

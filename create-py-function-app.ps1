@@ -126,25 +126,25 @@ function Identify-ResourceToReuse([string]$ResourceType, [bool]$ReuseOnly) {
         return $FoundResources[0]
     } elseif ($FoundResources.length -eq 0) {
         if ($ReuseOnly)  {
-            Write-Error "found 0 $Descriptor matching the configured prefix, expected to find exactly 1"
+            Write-Error "Found 0 $Descriptor matching the configured prefix, expected to find exactly 1"
         } else {
             return $null
         }
     } else {
-        Write-Error "found $($FoundResources.length) $Descriptor matching the configured prefix, 1 or 0 would have been acceptable"
+        Write-Error "Found $($FoundResources.length) $Descriptor matching the configured prefix, 1 or 0 would have been acceptable"
     }
 }
 
 function Perform-EarlyAzLogout() {
     az logout
     $global:LoginInfo = $null
-    Write-Host 'OK: logged out of Azure'
+    Write-Host 'OK: Logged out of Azure'
 }
 
 function Perform-EarlyDevOpsLogout() {
     az devops logout
     $global:DevOpsPat = $null
-    Write-Host 'OK: logged out of Azure DevOps'
+    Write-Host 'OK: Logged out of Azure DevOps'
 }
 
 
@@ -154,15 +154,15 @@ Write-Host '=======Checking local dependencies'
 try {
     git -v | Out-Null
 } catch {
-    Write-Error "seems like you don't have git installed"
+    Write-Error "Seems like you don't have git installed"
 }
 try {
     az -v | Out-Null
 } catch {
-    Write-Error "seems like you don't have the Azure CLI installed"
+    Write-Error "Seems like you don't have the Azure CLI installed"
 }
-Write-Host 'OK: local dependency check passed'
-Write-Warning 'logging you out of Azure and Azure DevOps, just in case'
+Write-Host 'OK: Local dependency check passed'
+Write-Warning 'Logging you out of Azure and Azure DevOps, just in case'
 try {
     az logout *>$null
     $global:LoginInfo = $null
@@ -174,7 +174,7 @@ try {
 
 Write-Host "=======Reading configuration from $ConfigFile"
 if (-Not (Test-Path "$PSScriptRoot/$ConfigFile")) {
-    Write-Error "could not find config file under `"$PSScriptRoot/$ConfigFile`""
+    Write-Error "Could not find config file under `"$PSScriptRoot/$ConfigFile`""
 }
 $Cfg = Get-Content "$PSScriptRoot/$ConfigFile" | ConvertFrom-Json
 if (-Not (Get-Member -inputobject $Cfg -name 'devOpsRepoName')) {
@@ -182,23 +182,23 @@ if (-Not (Get-Member -inputobject $Cfg -name 'devOpsRepoName')) {
 }
 $CreateKeyVault = (Get-Member -inputobject $Cfg -name 'createKeyVault') -and $Cfg.createKeyVault
 if (-Not $CreateKeyVault) {
-    Write-Warning 'will be skipping the creation of a Key Vault'
+    Write-Warning 'Will be skipping the creation of a Key Vault'
 }
 $CreateMinApprovalPolicy = (Get-Member -inputobject $Cfg -name 'defaultPullReviewerMailAddresses') -and $Cfg.defaultPullReviewerMailAddresses.Length -ge 3
 if (-Not $CreateMinApprovalPolicy) {
-    Write-Warning 'will be skipping the creation of a policy for minimum PR approval count because there are not enough values specified under "defaultPullReviewerMailAddresses"'
+    Write-Warning 'Will be skipping the creation of a policy for minimum PR approval count because there are not enough values specified under "defaultPullReviewerMailAddresses"'
 }
 $CreateAlerts = (Get-Member -inputobject $Cfg -name 'alertRecipientMailAddresses') -and $Cfg.alertRecipientMailAddresses.Length -ge 1
 if (-Not $CreateAlerts) {
-    Write-Warning 'will be skipping the creation of E-Mail alerts because there are not enough values specified under "alertRecipientMailAddresses"'
+    Write-Warning 'Will be skipping the creation of E-Mail alerts because there are not enough values specified under "alertRecipientMailAddresses"'
 }
-Write-Host 'OK: read config file'
+Write-Host 'OK: Read config file'
 
 Write-Host '=======Overriding configuration provided via config file with given command line arguments'
-if ($AzureStorageGeoLocation) { Write-ToObj $Cfg 'azureStorageGeoLocation' $AzureStorageGeoLocation}
-if ($AzureResourcesPrefix) { Write-ToObj $Cfg 'azureResourcesPrefix' $AzureResourcesPrefix}
-if ($DevOpsProject) { Write-ToObj $Cfg 'devOpsProject' $DevOpsProject}
-if ($DevOpsOrg) { Write-ToObj $Cfg 'devOpsOrg' $DevOpsOrg}
+if ($AzureStorageGeoLocation) { Write-ToObj $Cfg 'azureStorageGeoLocation' $AzureStorageGeoLocation }
+if ($AzureResourcesPrefix) { Write-ToObj $Cfg 'azureResourcesPrefix' $AzureResourcesPrefix }
+if ($DevOpsProject) { Write-ToObj $Cfg 'devOpsProject' $DevOpsProject }
+if ($DevOpsOrg) { Write-ToObj $Cfg 'devOpsOrg' $DevOpsOrg }
 
 $RepoUrl = -join($Cfg.devOpsOrg, '/', $Cfg.devOpsProject, '/_git/', $Cfg.devOpsRepoName)
 $PrefixQuery = "[?starts_with(name, '$($Cfg.azureResourcesPrefix)') || starts_with(name, '$($Cfg.azureResourcesPrefix.ToLower())')]"
@@ -213,34 +213,35 @@ $ExpectedKeys = @(
     'devOpsOrg'
 )
 if (-Not (Assert-Keys-Exist $Cfg -Keys $ExpectedKeys)) {
-    Write-Error 'invalid config file: missing required keys'
+    Write-Error 'Invalid config file: missing required keys'
 }
 if (-Not $Cfg.aspTier.StartsWith('P')) {
-    Write-Error 'this project currently only supports Premium Service Plan options since they are required for deployment slot usage (which are used for QA and currently baked into the PPL)'
+    Write-Error 'This project currently only supports Premium Service Plan options since they are required for deployment slot usage (which are used for QA and currently baked into the PPL)'
 }
 if ($AbsoluteTargetRepoPathPrefix) {
 
     Write-Host '=======Performing valdiation of the custom local target repo path that was given'
     if (Test-Path $TargetRepoPathPrefix) {
-        Write-Host 'OK: path validation passed'
+        Write-Host 'OK: Path validation passed'
         $TargetRepoPathPrefix = $AbsoluteTargetRepoPathPrefix
     } else {
-        Write-Error 'the given path is invalid'
+        Write-Error 'The given path is invalid'
     }
 }
 if (Test-Path "$TargetRepoPathPrefix/$($Cfg.devOpsRepoName)") {
-    Write-Warning 'the path given as a destination for the local clone of the git repo already exists, please either specify a different name or delete the folder'
+    Write-Warning 'The path given as a destination for the local clone of the git repo already exists, please either specify a different name or delete the folder'
     Write-Error "`"$TargetRepoPathPrefix/$($Cfg.devOpsRepoName)`" already exists"
 }
+
 Write-Host '=======Performing Azure DevOps prevalidation'
 Login-ToDevOpsWriteInfo
 try {
     $FoundRepos = az repos list --query `"$PrefixQuery`" --output json | ConvertFrom-Json
     if ($FoundRepos.length -ge 1) {
-        Write-Error "found existing DevOps repo matching the configured prefix, you will have to specify a custom repo name in the config file under `"devOpsRepoName`""
+        Write-Error "Found existing DevOps repo matching the configured prefix, you will have to specify a custom repo name in the config file under `"devOpsRepoName`""
     }
 } catch {
-    Warn-CustomThenThrowErr 'an error occurred, logging out of Azure DevOps' $_
+    Warn-CustomThenThrowErr 'An error occurred, logging out of Azure DevOps' $_
 } finally {
     Perform-EarlyDevOpsLogout
 }
@@ -253,32 +254,33 @@ try {
     $Asp = Identify-ResourceToReuse 'appservice plan'
     $Fa = Identify-ResourceToReuse 'functionapp'
     $Kv = Identify-ResourceToReuse 'keyvault'
-    Write-Host 'OK: state in Azure did not warrant an abort'
-    Write-Host 'OK: prevalidation ran through successfully'
+    Write-Host 'OK: State in Azure did not warrant an abort'
+    Write-Host 'OK: Prevalidation ran through successfully'
     if ($PrevalidationOnly) {
         Ask-ToConfirmElseExit -Question 'Are you certain you want to proceed?' -Header 'Azure Resource provisioning' -Force
     } else {
         Ask-ToConfirmElseExit -Question 'Are you certain you want to proceed?' -Header 'Azure Resource provisioning'
     }
 
+
     Write-Host '=====Starting creation of Azure resources'
     if ($Sa -eq $null) {
 
         Write-Host '=======Creating the Storage Account'
         $Sa = az storage account create -g "$($Rg.name)" -n "$($Cfg.azureResourcesPrefix.ToLower())sa" -l "$($Cfg.azureStorageGeoLocation)" --kind StorageV2 --output json | ConvertFrom-Json
-        Write-Host "OK: created Storage Account `"$($Sa.name)`""
+        Write-Host "OK: Created Storage Account `"$($Sa.name)`""
     }
     if ($Asp -eq $null) {
 
         Write-Host '=======Creating the App Service Plan'
         $Asp = az appservice plan create -g "$($Rg.name)" -n "$($Cfg.azureResourcesPrefix)-asp" --is-linux --number-of-workers 1 --sku "$($Cfg.aspTier)" --output json | ConvertFrom-Json
-        Write-Host "OK: created App Service Plan `"$($Asp.name)`""
+        Write-Host "OK: Created App Service Plan `"$($Asp.name)`""
     }
     if ($Fa -eq $null) {
 
         Write-Host '=======Creating the Function App'
         $Fa = az functionapp create -g "$($Rg.name)" -n "$($Cfg.azureResourcesPrefix)-fa" -s "$($Cfg.azureResourcesPrefix.ToLower())sa" --functions-version 4 -p "$($Cfg.azureResourcesPrefix)-asp" --https-only true --runtime python --assign-identity '[system]' --output json | ConvertFrom-Json
-        Write-Host "OK: created Function App `"$($Fa.name)`""
+        Write-Host "OK: Created Function App `"$($Fa.name)`""
     }
 
     Write-Host '=======Configuring the Function App'
@@ -289,9 +291,9 @@ try {
 
         Write-Host '=======Creating a deployment slot in the Function App for testing purposes'
         az functionapp deployment slot create -g "$($Rg.name)" -n "$($Cfg.azureResourcesPrefix)-fa" --slot 'test' | Out-Null
-        Write-Host 'OK: created new deployment slot'
+        Write-Host 'OK: Created new deployment slot'
     } else {
-        Write-Warning 'using existing deployment slot'
+        Write-Warning 'Using existing deployment slot'
     }
     $TSlotIdentityRes = az functionapp identity assign -g "$($Rg.name)" -n "$($Cfg.azureResourcesPrefix)-fa" --identities '[system]' --slot 'test' --output json | ConvertFrom-Json
     if ($CreateKeyVault) {
@@ -304,7 +306,7 @@ try {
                 $KvName = "$($Cfg.azureResourcesPrefix)-kv"
             }
             $Kv = az keyvault create -g "$($Rg.name)" -n $KvName -l "$($Cfg.azureStorageGeoLocation)" --enable-rbac-authorization false --output json | ConvertFrom-Json
-            Write-Host "OK: created Key Vault `"$($Kv.name)`""
+            Write-Host "OK: Created Key Vault `"$($Kv.name)`""
         }
         $ManagedSp = (az ad sp list --display-name "$($Fa.name)" --filter "servicePrincipalType eq 'ManagedIdentity'" --output json | ConvertFrom-Json) | Where-Object {-Not $_.displayName.EndsWith('/slots/test')}[0]
         # manually specifying -g as workaround for https://github.com/Azure/azure-cli/issues/27239
@@ -332,14 +334,15 @@ try {
         Write-Host 'OK: created E-Mail alerts'
     }
     $EndpointTargetInfo = $LoginInfo
-    Write-Host 'OK: state in Azure now matches the target state'
+    Write-Host 'OK: State in Azure now matches the target state'
 } catch {
-    Warn-CustomThenThrowErr 'an error occurred, logging out of Azure' $_
+    Warn-CustomThenThrowErr 'An error occurred, logging out of Azure' $_
 } finally {
     Perform-EarlyAzLogout
 }
 Login-ToDevOpsWriteInfo
 try {
+
 
     Write-Host '=====Creating the DevOps Service Connection'
     $Endpoints = az devops service-endpoint list --query "$PrefixQuery" --output json | ConvertFrom-Json
@@ -352,13 +355,13 @@ try {
         }
         1 {
             $ServiceConn = $Endpoints[0]
-            Write-Warning "using existing Service Connection `"$($ServiceConn.name)`""
+            Write-Warning "Using existing Service Connection `"$($ServiceConn.name)`""
         }
         default {
-            Write-Error "found $($Endpoints.length) Service Connections matching the configured prefix, 1 or 0 would have been acceptable"
+            Write-Error "Found $($Endpoints.length) Service Connections matching the configured prefix, 1 or 0 would have been acceptable"
         }
     }
-    Write-Host 'OK: required Service Connection is set up'
+    Write-Host 'OK: Required Service Connection is set up'
 
 
     Write-Host '=====Starting upload of Azure Function boilerplate code and pipeline scaffolding to a new DevOps repository'
@@ -366,7 +369,7 @@ try {
     Write-Host '=======Creating local directory'
     New-Item -Path "$TargetRepoPathPrefix" -Name "$($Cfg.devOpsRepoName)" -ItemType 'directory' | Out-Null
     Set-Location "$TargetRepoPathPrefix/$($Cfg.devOpsRepoName)"
-    Write-Host "OK: created directory `"$($Cfg.devOpsRepoName)`""
+    Write-Host "OK: Created directory `"$($Cfg.devOpsRepoName)`""
 
     Write-Host '=======Creating and cloning DevOps repository'
     az repos create --name $Cfg.devOpsRepoName *>$null
@@ -401,7 +404,7 @@ try {
     Assert-GitStatusOk
     az repos update --r $Cfg.devOpsRepoName --default-branch main *>$null
     $RepoData = az repos show -r $Cfg.devOpsRepoName | ConvertFrom-Json
-    Write-Host "OK: created the repository `"$($Cfg.devOpsRepoName)`" with the needed contents in `"$($Cfg.devOpsOrg)`" and cloned locally to `"$($Cfg.devOpsRepoName)`""
+    Write-Host "OK: Created the repository `"$($Cfg.devOpsRepoName)`" with the needed contents in `"$($Cfg.devOpsOrg)`" and cloned locally to `"$($Cfg.devOpsRepoName)`""
 
 
     Write-Host '=====Starting configuration of DevOps repository'
@@ -412,7 +415,7 @@ try {
         Write-Error $Res
     }
     $PipelineData = $Res | ConvertFrom-Json
-    Write-Host 'OK: created DevOps pipeline using the YML file contained in the repo'
+    Write-Host 'OK: Created DevOps pipeline using the YML file contained in the repo'
 
     Write-Host '=======Creating pipeline variables'
     az pipelines variable create --name 'PythonVersion' --pipeline-id $PipelineData.id --value "$($Cfg.pythonVersion)" | Out-Null
@@ -421,11 +424,11 @@ try {
     az pipelines variable create --name 'ResourceGroupName' --pipeline-id $PipelineData.id --value "$($Cfg.azureResourcesPrefix)-rg" | Out-Null
     az pipelines variable create --name 'TestSlotBlobOutPath' --pipeline-id $PipelineData.id --value 'test-slot-blobcontainer' | Out-Null
     az pipelines variable create --name 'TestSlotSchedule' --pipeline-id $PipelineData.id --value '0 30 * * * *' | Out-Null
-    Write-Host 'OK: created DevOps pipeline variables'
+    Write-Host 'OK: Created DevOps pipeline variables'
 
     Write-Host '=======Starting pipeline to deploy sample code'
     az pipelines run --id $PipelineData.id --open | Out-Null
-    Write-Host 'OK: started DevOps pipeline and opened in browser'
+    Write-Host 'OK: Started DevOps pipeline and opened in browser'
 
     Write-Host '=======Configuring repository policies'
     if ($CreateMinApprovalPolicy) {
@@ -434,14 +437,14 @@ try {
     az repos policy work-item-linking create --blocking false --branch main --enabled true --repository-id $RepoData.id *>$null
     az repos policy comment-required create --blocking true --branch main --enabled true --repository-id $RepoData.id *>$null
     az repos policy required-reviewer create --blocking false --branch main --enabled true --message 'Automatically adding default reviewers' --repository-id $RepoData.id --required-reviewer-ids ($Cfg.defaultPullReviewerMailAddresses -join ';') *>$null
-    Write-Host 'OK: configured repository policies'
+    Write-Host 'OK: Configured repository policies'
 
     Write-Host '=======Configuring build policies'
     az repos policy build create --blocking true --branch main --build-definition-id $PipelineData.id --display-name 'PR test, build and test-slot deployment policy' --enabled true --manual-queue-only false --queue-on-source-update-only  false --repository-id $RepoData.id --valid-duration 0 *>$null
-    Write-Host 'OK: configured build policies'
-    Write-Host 'DONE: proceeding with exit after successful run!'
+    Write-Host 'OK: Configured build policies'
+    Write-Host 'DONE: Proceeding with exit after successful run!'
 } catch {
-    Warn-CustomThenThrowErr 'an error occurred, logging out of Azure DevOps' $_
+    Warn-CustomThenThrowErr 'An error occurred, logging out of Azure DevOps' $_
 } finally {
     Perform-EarlyDevOpsLogout
 }
