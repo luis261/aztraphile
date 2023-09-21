@@ -194,8 +194,7 @@ if (-Not $CreateAlerts) {
 }
 Write-Host 'OK: Read config file'
 
-Write-Host '=======Overriding configuration provided via config file with given command line arguments'
-if ($AzureStorageGeoLocation) { Write-ToObj $Cfg 'azureStorageGeoLocation' $AzureStorageGeoLocation }
+Write-Host '=======Overriding configuration provided via file with given command line arguments'
 if ($AzureResourcesPrefix) { Write-ToObj $Cfg 'azureResourcesPrefix' $AzureResourcesPrefix }
 if ($DevOpsProject) { Write-ToObj $Cfg 'devOpsProject' $DevOpsProject }
 if ($DevOpsOrg) { Write-ToObj $Cfg 'devOpsOrg' $DevOpsOrg }
@@ -220,7 +219,7 @@ if (-Not $Cfg.aspTier.StartsWith('P')) {
 }
 if ($AbsoluteTargetRepoPathPrefix) {
 
-    Write-Host '=======Performing valdiation of the custom local target repo path that was given'
+    Write-Host '=======Performing validation of the custom local target repo path that was given'
     if (Test-Path $TargetRepoPathPrefix) {
         Write-Host 'OK: Path validation passed'
         $TargetRepoPathPrefix = $AbsoluteTargetRepoPathPrefix
