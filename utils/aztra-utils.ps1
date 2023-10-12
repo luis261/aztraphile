@@ -1,4 +1,3 @@
-$ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 3.0
 
 
@@ -586,7 +585,7 @@ function Ask-ToConfirmElseExit {
     Write-Host "Proceeding as requested with $Header"
 }
 
-function Copy-ToIndex([string]$SelectionSpecifier, [string]$FetchPathPrefix, $Destination='.', $GitErrorAction='EXIT') {
+function Copy-ToIndex([string]$SelectionSpecifier, [string]$FetchPathPrefix, $Destination='.', $GitErrorAction='ERR') {
     Fetch-ByLocalCopy "$FetchPathPrefix$SelectionSpecifier" $Destination
     Add-ToIndex $SelectionSpecifier $GitErrorAction
 }
@@ -599,12 +598,12 @@ function Fetch-ByLocalCopy([string]$SelectionSpecifier, [string]$Destination='.'
     }
 }
 
-function Add-ToIndex([string]$SelectionSpecifier, [string]$GitErrorAction='EXIT') {
+function Add-ToIndex([string]$SelectionSpecifier, [string]$GitErrorAction='ERR') {
     git add $SelectionSpecifier *>>"$GitLogFile"
     Assert-GitStatusOk $GitErrorAction
 }
 
-function Assert-GitStatusOk([string]$FallbackAction='EXIT') {
+function Assert-GitStatusOk([string]$FallbackAction='ERR') {
     if ($LastExitCode -ne 0) {
         Handle-FallbackRouting $FallbackAction 'git encountered an error, please refer to the log file'
     }
@@ -612,9 +611,11 @@ function Assert-GitStatusOk([string]$FallbackAction='EXIT') {
 
 function Handle-FallbackRouting([string]$Action, [string]$Message='') {
     switch ($Action.ToUpper()) {
-        'EXIT' {
+        'ERR' {
             if ($Message.Length > 0) {
                 Write-Error $Message
+            } else {
+                Write-Error 'An error occurred'
             }
         }
         'THROW' {
