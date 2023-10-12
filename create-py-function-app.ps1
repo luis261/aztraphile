@@ -195,6 +195,7 @@ if (-Not $CreateAlerts) {
 Write-Host 'OK: Read config file'
 
 Write-Host '=======Overriding configuration provided via file with given command line arguments'
+Write-ToObj $Cfg 'azureStorageGeoLocation' $AzureStorageGeoLocation
 if ($AzureResourcesPrefix) { Write-ToObj $Cfg 'azureResourcesPrefix' $AzureResourcesPrefix }
 if ($DevOpsProject) { Write-ToObj $Cfg 'devOpsProject' $DevOpsProject }
 if ($DevOpsOrg) { Write-ToObj $Cfg 'devOpsOrg' $DevOpsOrg }
