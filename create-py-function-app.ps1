@@ -79,7 +79,7 @@ param(
 )
 
 
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Inquire'
 Set-StrictMode -Version 3.0
 
 
@@ -163,6 +163,8 @@ try {
 }
 Write-Host 'OK: Local dependency check passed'
 Write-Warning 'Logging you out of Azure and Azure DevOps, just in case'
+$IncomingPreference = $ErrorActionPreference
+$ErrorActionPreference = 'SilentlyContinue'
 try {
     az logout *>$null
     $global:LoginInfo = $null
@@ -171,6 +173,7 @@ try {
     az devops logout *>$null
     $global:DevOpsPat = $null
 } catch { }
+$ErrorActionPreference = $IncomingPreference
 
 Write-Host "=======Reading configuration from $ConfigFile"
 if (-Not (Test-Path "$PSScriptRoot/$ConfigFile")) {
