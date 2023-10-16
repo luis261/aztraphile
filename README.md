@@ -36,7 +36,7 @@ the following resources are created by the main script:
   - this is where your code gets executed
   - contains your application settings (environment variables)
   - contains a test slot that's configured to be an environment nearly identical to PROD
-    - it is also a target for automatic deployments (in particular: deployments resulting from the build validation policy that get's triggered on the creation of new PRs)
+    - it is also a target for automatic deployments (in particular: deployments resulting from the build validation policy that gets triggered on the creation of new PRs)
 - Application Insights
 - Key Vault (only created if ```createKeyVault``` is set to ```true``` in the config file)
   - can securely store confidential data (such as API credentials) in the form of secrets
@@ -56,7 +56,7 @@ the project ships with these pre-written Function samples so you don't have to w
 - [Timer triggered Function that logs to a Blob file](./function-samples/timer_blob_logging_functions_sample.py) (and another Function that periodically clears that file)
 - there are unittest samples for all of these Functions (written using pytest)
   - since you inherit a functioning assortment of tests that are properly integrated into your deployment process from the start, the usual entry barrier of having to setup a test-suite from scratch is avoided
-  - this way, you can make it a habit to using automated testing for your Azure Functions from the start instead of putting it off and accruing tech debt over time
+  - this way, you can use automated testing for your Azure Functions from the start instead of putting it off and accruing tech debt over time
 
 ### Setup of Azure DevOps constructs
 the following is a description of the setup in Azure DevOps:
@@ -67,7 +67,7 @@ the following is a description of the setup in Azure DevOps:
     - variables for that pipeline that allow you to parameterize certain aspects relating to your code in Azure, e.g. configuring a CRON schedule for a timer triggered Function in your test slot that differs from the one used productively (to avoid load interference)
     - when deploying your code, the pipeline also configures the appsettings of your Function App according to ```appsettings.json``` (which is tracked by git)
       - this way, changes to environment variables are also subject to peer review and can be traced retroactively
-      - just make sure to never directly store credentials in the mentioned JSON file; instead, store them as a secret in the Key Vault as shown in the corresponding function samples (you do need a Key Vault reference in the appsettings file though, as shown here)
+      - just make sure to never directly store credentials in the mentioned JSON file; instead, store them as a secret in the Key Vault as shown in the corresponding function sample (you do need a Key Vault reference in the appsettings file though, as shown [here](./cfg/appsettings.json#L45))
     - the pipeline also integrates with the builtin Azure Devops test reporting feature
     ![test report example](./readme_attachments/ppl_test_report.png)
     ![failed test pipeline run example](./readme_attachments/ppl_failed_test_summary.png)
@@ -82,13 +82,13 @@ the following is a description of the setup in Azure DevOps:
 ### Monitoring and alerting
 - this project contains code that can plot graphs in the console; calls [Show-Graph](https://gist.github.com/PrateekKumarSingh/9168afa8e7c7da801efa858705fb485b) under the hood
   - graphical monitoring is available via ```Show-FaMetric``` which can display CPU and memory workload
-  - displaying key metrics over configurable spans of times like that can help you recognize patterns at first glance you might have missed otherwise
+  - displaying key metrics over configurable spans of time like that can help you recognize patterns at first glance you might have missed otherwise
   ![Show-FaMetric example usage](./readme_attachments/show_fametric_example_usage.png)
 - by default (if the condition described in the provisioning section [above](#automated-provisioning-in-azure) is met in the config file), you will receive E-Mail alerts pertaining to your function
   - there is a metric alert rule that triggers if the average CPU percentage is over 90
   - there is a metric alert rule that triggers if the maximum memory usage percentage is over 90
   - additionally, a log search alert rule is created that activates if any exceptions occurred in the execution of your Functions during the last hour
-- instead of using such builtin push-based constructs, you could easily opt for a polling-based approach by running queries periodically using ```Fetch-FaMetric``` and ```Fetch-FaInsights``` (a simple example of applying keyword message filtering to the results of ```Fetch-FaInsights``` is shown in the ("Advanced usage" section)[#advanced-usage], you can go explore the code or run the Get-Help commandlet on the mentioned utility functions for in-depth documentation)
+- instead of using such builtin push-based constructs, you could easily opt for a polling-based approach by running queries periodically using ```Fetch-FaMetric``` and ```Fetch-FaInsights``` (a simple example of applying keyword message filtering to the results of ```Fetch-FaInsights``` is shown in the ["Advanced usage" section](#advanced-usage), you can go explore the code or run the ```Get-Help``` commandlet on the mentioned utility functions for in-depth documentation)
 
 ### Additional orchestration features
 there are lots of orchestration/utility features in the form of powershell functions stored in ```aztra-utils.ps1```. You can run them locally, so you don't have to bother with the Azure portal
@@ -100,7 +100,7 @@ there are lots of orchestration/utility features in the form of powershell funct
 - ```Set-AzPipelinesVar``` is used to create/update Azure DevOps build variables
 
 ## Advanced usage
-- you can try to be extra smart about your testing strategy and achieve a level of efficiency that's usually only achievable with proper suites of unittests even without covering your code and maintaining those tests
+- you can try to be extra smart about your testing strategy and achieve a level of efficiency usually reserved for proper suites of unittests even without covering your code and maintaining those tests
   - (you could also use this strategy complementary to your unittests, I definitely don't discourage having them anyway!)
   - the way to achieve that kind of efficiency through integration/system-level testing in this context is via leveraging the automatic deployments that trigger on PR creation as follows:
     - let's say you have an important service that is the main consumer of the API of your Function
@@ -109,7 +109,7 @@ there are lots of orchestration/utility features in the form of powershell funct
       - or even a legacy service you're in the process of phasing out anyway
     - configure that non-critical service/dashboard to use the URL pointing to the test slot
       - this way, you can observe the results of new versions being "tested automatically" with limited potential for major repercussions before deciding whether to merge new changes or not
-    - another situation where you can leverage your test slot would be if you're in a situation where there's another team that's pushing for new features you are responsible for, which they might need for a new service they're currently getting off the ground
+    - another situation to leverage your test slot would be if there's another team that's pushing for new features in your Function, which they might need for a new service they're currently getting off the ground
       - you could offer to hook them up to the test slot for fast access to new features under the caveat that it might not be completely stable
     - thus, the less vital consumers can act as an additional layer of validation in terms of testing
 - filtering logs based on their message ```Fetch-FaInsights -InsightsSpecifier "logs" -Raw | Where-Object (Build-LogMessageSieve "executed")```
