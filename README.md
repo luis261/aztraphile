@@ -100,6 +100,9 @@ there are lots of orchestration/utility features in the form of powershell funct
 - ```Set-AzPipelinesVar``` is used to create/update Azure DevOps build variables
 
 ## Advanced usage
+- filtering logs based on their message ```Fetch-FaInsights -InsightsSpecifier "logs" -Raw | Where-Object (Build-LogMessageSieve "executed")```
+- polling of logs (live, without duplicated events) and optional filtering based on a passed query (coming soon)
+- live metric plotting in a separate powershell window: via ```Show-LiveFaMetric```
 - you can try to be extra smart about your testing strategy and achieve a level of efficiency usually reserved for proper suites of unittests even without covering your code and maintaining those tests
   - (you could also use this strategy complementary to your unittests, I definitely don't discourage having them anyway!)
   - the way to achieve that kind of efficiency through integration/system-level testing in this context is via leveraging the automatic deployments that trigger on PR creation as follows:
@@ -112,6 +115,3 @@ there are lots of orchestration/utility features in the form of powershell funct
     - another situation to leverage your test slot would be if there's another team that's pushing for new features in your Function, which they might need for a new service they're currently getting off the ground
       - you could offer to hook them up to the test slot for fast access to new features under the caveat that it might not be completely stable
     - thus, the less vital consumers can act as an additional layer of validation in terms of testing
-- filtering logs based on their message ```Fetch-FaInsights -InsightsSpecifier "logs" -Raw | Where-Object (Build-LogMessageSieve "executed")```
-- polling of logs (live, without duplicated events) and optional filtering based on a passed query (coming soon)
-- live metric plotting in a separate powershell window: via ```Show-LiveFaMetric```
