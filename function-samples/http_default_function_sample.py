@@ -19,6 +19,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             name = req_body.get('name')
 
     if name:
+        """
+        directly embedding user-controlled data like this (without escaping it) is only ok because the mimetype is `text/plain` by default
+        https://learn.microsoft.com/en-us/python/api/azure-functions/azure.functions.httpresponse?view=azure-python#parameters
+        """
         return func.HttpResponse(
             f"Hello, {name}. This HTTP-triggered function executed successfully."
          )
