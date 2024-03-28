@@ -382,6 +382,7 @@ try {
     Add-Content -Path 'README.md' -Value '```'
     Get-Content "$PSScriptRoot/$ConfigFile" | Add-Content -Path 'README.md'
     Add-Content -Path 'README.md' -Value '```'
+    Add-Content -Path 'README.md' -Value "`nInitial setup date: $((Get-Date).ToString('yyyy/MM/dd'))
     Add-ToIndex 'README.md'
     git commit -m 'Initial commit: add generated README' *>>"$GitLogFile"
     Assert-GitStatusOk
