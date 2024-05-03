@@ -3,7 +3,7 @@ import logging
 try:
     import kv_util as kv
 # when running the tests, local modules have to be imported differently (as opposed to running on the function host in Azure)
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from . import kv_util as kv
 
 
