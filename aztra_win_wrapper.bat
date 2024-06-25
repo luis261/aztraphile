@@ -1,2 +1,2 @@
 @echo off
-powershell -ExecutionPolicy Bypass -NoExit -NoLogo -File "%~dp0aztra-up.ps1"
+powershell -ExecutionPolicy RemoteSigned -NoExit -NoLogo -File "%~dp0aztra-up.ps1"
