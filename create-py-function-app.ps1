@@ -377,6 +377,17 @@ try {
     Assert-GitStatusOk
     git checkout -b main *>>"$GitLogFile"
     Assert-GitStatusOk
+    Add-Content -Path 'README.md' -Value '![Aztraphile Badge](https://img.shields.io/badge/setup_by_aztraphile-000000?style=flat&logo=powershell&logoColor=blue&labelColor=white&color=012456)'
+    Add-Content -Path 'README.md' -Value "`nThis is the initial config this repo was generated with:"
+    Add-Content -Path 'README.md' -Value '```'
+    Get-Content -Path "$PSScriptRoot/$ConfigFile" | Add-Content -Path 'README.md'
+    Add-Content -Path 'README.md' -Value '```'
+    Add-Content -Path 'README.md' -Value "`nInitial setup date: $((Get-Date).ToString('yyyy/MM/dd'))
+    Add-ToIndex 'README.md'
+    git commit -m 'Initial commit: add generated README' *>>"$GitLogFile"
+    Assert-GitStatusOk
+    git push --set-upstream origin main *>>"$GitLogFile"
+    Assert-GitStatusOk
     Copy-ToIndex '.funcignore' "${PSScriptRoot}/cfg/"
     Copy-ToIndex '.gitignore' "${PSScriptRoot}/cfg/"
     Copy-ToIndex 'host.json' "${PSScriptRoot}/cfg/"
@@ -387,7 +398,7 @@ try {
     Copy-ToIndex 'requirements.txt' "${PSScriptRoot}/cfg/"
     git commit -m 'Add files needed for sample Azure Function' *>>"$GitLogFile"
     Assert-GitStatusOk
-    git push --set-upstream origin main *>>"$GitLogFile"
+    git push *>>"$GitLogFile"
     Assert-GitStatusOk
     Copy-ToIndex 'azure-pipelines.yml' "${PSScriptRoot}/cfg/"
     New-Item -Name 'tests' -ItemType 'directory' | Out-Null
